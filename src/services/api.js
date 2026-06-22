@@ -1,53 +1,56 @@
 import axios from 'axios';
-import { API_CONFIG } from '../utils/constants';
+import { getBaseUrl, getPredictUrl, isConfigValid } from '../utils/constants';
 
-const api = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: {
-    'Accept': 'application/json',
-  },
-});
+// Create axios instance dengan timeout lebih lama
+const createApi = () => {
+  const baseURL = getBaseUrl();
+  
+  return axios.create({
+    baseURL: baseURL || undefined,
+    timeout: 120000, // ⬆️ INCREASE: 2 menit (120 detik)
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
+};
 
-// Add request interceptor for logging
-api.interceptors.request.use(
-  (config) => {
-    console.log(`🚀API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+// ==================== API FUNCTIONS ====================
+
+export const predictFatigue = async (audioFile, onProgress) => {
+  if (!isConfigValid()) {
+    throw new Error('API not configured. Please go to Configure page first.');
   }
-);
 
-// Add response interceptor for error handling
-api.interceptors.response.use(
-  (response) => {
-    console.log(`API Response: ${response.status}`);
-    return response;
-  },
-  (error) => {
-    console.error('API Error:', error.message);
-    return Promise.reject(error);
-  }
-);
-
-export const predictFatigue = async (audioFile) => {
   const formData = new FormData();
   formData.append('file', audioFile);
 
+  const api = createApi();
+  const predictUrl = getPredictUrl();
+
   try {
-    const response = await api.post(API_CONFIG.PREDICT_ENDPOINT, formData, {
+    const response = await api.post(predictUrl, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+      },
+      // ⬆️ INCREASE timeout khusus untuk upload
+      timeout: 120000,
+      // Progress tracking
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress({ type: 'upload', progress: percentCompleted });
+        }
       },
     });
     return response.data;
   } catch (error) {
+    if (error.code === 'ECONNABORTED') {
+      throw new Error('Request timeout. Backend processing took too long. Please try again with a shorter audio file.');
+    }
     if (error.response) {
       throw new Error(error.response.data?.error || `Server error: ${error.response.status}`);
     } else if (error.request) {
-      throw new Error('No response from server. Please check your connection.');
+      throw new Error('No response from server. Please check your connection and API URL.');
     } else {
       throw new Error(error.message);
     }
@@ -55,12 +58,23 @@ export const predictFatigue = async (audioFile) => {
 };
 
 export const checkConnection = async () => {
+  if (!isConfigValid()) return false;
+
+  const api = createApi();
+  const baseUrl = getBaseUrl();
+
   try {
-    await api.get('/', { timeout: 5000 });
+    // Coba ping base URL dengan timeout pendek
+    await api.get('/', { timeout: 10000 });
     return true;
   } catch {
-    return false;
+    try {
+      await api.options(getPredictUrl(), { timeout: 10000 });
+      return true;
+    } catch {
+      return false;
+    }
   }
 };
 
-export default api;
+export default createApi;

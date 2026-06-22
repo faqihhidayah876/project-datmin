@@ -1,12 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useApi } from './useApi';
-// Import dari constants.js (sudah include getGaugeScore)
 import { CLASS_LABELS, getGaugeScore, FEATURE_IMPORTANCE_MAP } from '../utils/constants';
 
 export const useAudioAnalysis = () => {
   const [results, setResults] = useState(null);
   const [history, setHistory] = useState([]);
-  const { loading, error, connected, predict, checkApiConnection } = useApi();
+  const { loading, error, connected, progress, predict, checkApiConnection } = useApi();
 
   const analyzeAudio = useCallback(async (audioFile) => {
     try {
@@ -54,6 +53,7 @@ export const useAudioAnalysis = () => {
     loading,
     error,
     connected,
+    progress,
     analyzeAudio,
     clearResults,
     checkApiConnection,

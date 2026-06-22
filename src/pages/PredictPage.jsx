@@ -1,13 +1,17 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Mic,           // GANTI: Microphone → Mic
+  Mic,
   PieChart,      
   Eye, 
   Code, 
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle,
+  Activity
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAudioAnalysis } from '../hooks/useAudioAnalysis';
+import { isConfigValid } from '../utils/constants';
 import UploadZone from '../components/upload/UploadZone';
 import AudioPreview from '../components/upload/AudioPreview';
 import LoadingSpinner from '../components/common/LoadingSpinner';
@@ -45,6 +49,29 @@ const PredictPage = () => {
 
   return (
     <div className="pt-24 pb-12 px-4 max-w-7xl mx-auto">
+      {/* Warning jika API belum dikonfigurasi */}
+      {!isConfigValid() && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 bg-accent/10 border border-accent/30 rounded-xl"
+        >
+          <div className="flex items-center gap-3 text-accent">
+            <AlertCircle className="w-5 h-5" />
+            <div>
+              <p className="font-medium">API Not Configured</p>
+              <p className="text-sm text-white/70">
+                Please{' '}
+                <Link to="/configure" className="underline hover:text-white">
+                  configure your backend API
+                </Link>{' '}
+                first before analyzing audio.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Connection Status */}
       <div className="flex justify-end mb-4">
         <button
@@ -67,7 +94,6 @@ const PredictPage = () => {
         <GlassCard>
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-              {/* GANTI DI SINI: Microphone → Mic */}
               <Mic className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -255,8 +281,8 @@ const PredictPage = () => {
           <strong>Error:</strong> {error}
           <p className="mt-2 text-white/50">
             Please ensure:
-            <br />1. Backend Flask is running on Hugging Face Spaces
-            <br />2. API URL in .env is correct
+            <br />1. Backend is running (Ngrok or Hugging Face)
+            <br />2. API URL in Configure page is correct
             <br />3. CORS is enabled on the backend
           </p>
         </motion.div>
