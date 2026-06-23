@@ -10,7 +10,7 @@ export const useAudioAnalysis = () => {
   const analyzeAudio = useCallback(async (audioFile) => {
     try {
       const data = await predict(audioFile);
-      
+
       if (data.success) {
         const processedResults = {
           predictedClass: data.predicted_class,
@@ -23,7 +23,7 @@ export const useAudioAnalysis = () => {
         };
 
         setResults(processedResults);
-        
+
         const historyItem = {
           id: Date.now(),
           timestamp: new Date(),
@@ -31,7 +31,7 @@ export const useAudioAnalysis = () => {
           predictedClass: data.predicted_class,
           confidence: data.confidence,
         };
-        
+
         setHistory(prev => [historyItem, ...prev].slice(0, 50));
         return processedResults;
       } else {
@@ -47,6 +47,10 @@ export const useAudioAnalysis = () => {
     setResults(null);
   }, []);
 
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+  }, []);
+
   return {
     results,
     history,
@@ -56,6 +60,7 @@ export const useAudioAnalysis = () => {
     progress,
     analyzeAudio,
     clearResults,
+    clearHistory,
     checkApiConnection,
   };
 };
