@@ -1,50 +1,15 @@
 // ==================== API CONFIGURATION ====================
 
-// Ambil config dari localStorage, fallback ke default
-const getStoredConfig = () => {
-  try {
-    const stored = localStorage.getItem('api_config');
-    if (stored) return JSON.parse(stored);
-  } catch (e) {
-    console.error('Error parsing stored config:', e);
-  }
-  return null;
-};
+export const HF_SPACE_URL = 'https://qeehh-fatigue-audio-classifier.hf.space';
+export const HF_PREDICT_ENDPOINT = '/predict';
+export const MAX_AUDIO_DURATION = 15;
 
-const storedConfig = getStoredConfig();
+export const getBaseUrl = () => HF_SPACE_URL;
+export const getPredictUrl = () => `${HF_SPACE_URL}${HF_PREDICT_ENDPOINT}`;
+export const isConfigValid = () => true;
 
-// Default config (kosong - user harus setup dulu)
-export const DEFAULT_CONFIG = {
-  mode: 'ngrok', // 'ngrok' | 'huggingface'
-  ngrokToken: '',
-  ngrokUrl: '',
-  huggingfaceUrl: '',
-  predictEndpoint: '/predict',
-};
-
-// Current active config
-export const API_CONFIG = storedConfig || DEFAULT_CONFIG;
-
-// Helper: Get base URL berdasarkan mode
-export const getBaseUrl = () => {
-  if (API_CONFIG.mode === 'ngrok') {
-    return API_CONFIG.ngrokUrl || '';
-  }
-  return API_CONFIG.huggingfaceUrl || '';
-};
-
-// Helper: Get full predict URL
-export const getPredictUrl = () => {
-  const base = getBaseUrl();
-  const endpoint = API_CONFIG.predictEndpoint || '/predict';
-  return base ? `${base}${endpoint}` : '';
-};
-
-// Helper: Check if config is valid
-export const isConfigValid = () => {
-  const base = getBaseUrl();
-  return base && base.startsWith('http');
-};
+// ==================== LOGO ====================
+export const LOGO_URL = 'https://i.ibb.co.com/Rpkm30y0/logo-datmin.png';
 
 // ==================== CLASSES & LABELS ====================
 export const CLASSES = ['low', 'medium', 'high'];

@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Settings, Save, TestTube, AlertCircle, CheckCircle, Globe, Server } from 'lucide-react';
+import { Settings, Save, TestTube, AlertCircle, CheckCircle, Globe, Server, Mic } from 'lucide-react';
 import GlassCard from '../common/GlassCard';
 
 const ApiConfig = () => {
   const navigate = useNavigate();
-  
+
   const [config, setConfig] = useState({
-    mode: 'ngrok',
-    ngrokToken: '',
-    ngrokUrl: '',
     huggingfaceUrl: '',
     predictEndpoint: '/predict',
   });
@@ -23,7 +20,12 @@ const ApiConfig = () => {
     const stored = localStorage.getItem('api_config');
     if (stored) {
       try {
-        setConfig(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Migrate old config format (remove ngrok fields)
+        setConfig({
+          huggingfaceUrl: parsed.huggingfaceUrl || '',
+          predictEndpoint: parsed.predictEndpoint || '/predict',
+        });
       } catch (e) {
         console.error('Error parsing config:', e);
       }
@@ -32,48 +34,69 @@ const ApiConfig = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setConfig(prev => ({ ...prev, [name]: value }));
-    setSaved(false);
-  };
-
-  const handleModeChange = (mode) => {
-    setConfig(prev => ({ ...prev, mode }));
+    setConfig(prev => ({ ...prev, [name]: value.trim() }));
     setSaved(false);
   };
 
   const saveConfig = () => {
-    localStorage.setItem('api_config', JSON.stringify(config));
+    // Validate URL
+    let url = config.huggingfaceUrl.trim();
+
+    // Remove trailing slash
+    if (url.endsWith('/')) {
+      url = url.slice(0, -1);
+    }
+
+    // Validate format
+    if (!url.startsWith('https://') && !url.startsWith('http://')) {
+      setTestStatus('error');
+      setTestMessage('URL must start with https:// or http://');
+      return;
+    }
+
+    const cleanConfig = {
+      huggingfaceUrl: url,
+      predictEndpoint: config.predictEndpoint || '/predict',
+    };
+
+    localStorage.setItem('api_config', JSON.stringify(cleanConfig));
+    setConfig(cleanConfig);
     setSaved(true);
+    setTestStatus(null);
     setTimeout(() => setSaved(false), 3000);
   };
 
   const testConnection = async () => {
+    if (!config.huggingfaceUrl) {
+      setTestStatus('error');
+      setTestMessage('Please enter Hugging Face URL first');
+      return;
+    }
+
     setTestStatus('testing');
     setTestMessage('Testing connection...');
 
     try {
-      const baseUrl = config.mode === 'ngrok' ? config.ngrokUrl : config.huggingfaceUrl;
-      
-      if (!baseUrl) {
-        throw new Error('Please fill in the URL first');
-      }
+      // Try to fetch root endpoint with no-cors
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      const response = await fetch(`${baseUrl}/`, {
+      const response = await fetch(`${config.huggingfaceUrl}/`, {
         method: 'GET',
         mode: 'no-cors',
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
+      // With no-cors, we can't read response, but if no error, it's reachable
       setTestStatus('success');
       setTestMessage('Server is reachable! (CORS may block detailed check)');
-      
+
     } catch (error) {
       setTestStatus('error');
-      setTestMessage(`Connection failed: ${error.message}`);
+      setTestMessage(`Connection failed: ${error.name === 'AbortError' ? 'Request timeout' : error.message}`);
     }
-  };
-
-  const getActiveUrl = () => {
-    return config.mode === 'ngrok' ? config.ngrokUrl : config.huggingfaceUrl;
   };
 
   return (
@@ -91,149 +114,44 @@ const ApiConfig = () => {
             Configure Backend
           </h1>
           <p className="text-white/50">
-            Setup your Ngrok or Hugging Face backend connection
+            Connect to your Hugging Face Space backend
           </p>
         </div>
 
-        {/* Mode Selection */}
+        {/* Hugging Face Configuration */}
         <GlassCard className="mb-6">
           <h2 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
-            <Server className="w-5 h-5 text-primary-light" />
-            Select Backend Mode
+            <Globe className="w-5 h-5 text-accent" />
+            Hugging Face Space
           </h2>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => handleModeChange('ngrok')}
-              className={`p-4 rounded-2xl border-2 transition-all ${
-                config.mode === 'ngrok'
-                  ? 'border-primary bg-primary/10'
-                  : 'border-glass-border hover:border-white/25'
-              }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  config.mode === 'ngrok' ? 'bg-primary border-primary' : 'border-white/30'
-                }`} />
-                <span className="font-semibold">Ngrok</span>
-              </div>
-              <p className="text-sm text-white/50 text-left">
-                Use Google Colab + Ngrok tunnel
-              </p>
-            </button>
 
-            <button
-              onClick={() => handleModeChange('huggingface')}
-              className={`p-4 rounded-2xl border-2 transition-all ${
-                config.mode === 'huggingface'
-                  ? 'border-primary bg-primary/10'
-                  : 'border-glass-border hover:border-white/25'
-              }`}
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <div className={`w-4 h-4 rounded-full border-2 ${
-                  config.mode === 'huggingface' ? 'bg-primary border-primary' : 'border-white/30'
-                }`} />
-                <span className="font-semibold">Hugging Face</span>
-              </div>
-              <p className="text-sm text-white/50 text-left">
-                Use Hugging Face Spaces
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-white/70 mb-2">
+                Hugging Face Space URL <span className="text-accent">*</span>
+              </label>
+              <input
+                type="text"
+                name="huggingfaceUrl"
+                value={config.huggingfaceUrl}
+                onChange={handleChange}
+                placeholder="https://your-username-project.hf.space"
+                className="w-full px-4 py-3 bg-black/30 border border-glass-border rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary transition-colors"
+              />
+              <p className="text-xs text-white/40 mt-1">
+                Example: https://qeehh-fatigue-audio-classifier.hf.space
               </p>
-            </button>
+            </div>
           </div>
         </GlassCard>
 
-        {/* Ngrok Configuration */}
-        {config.mode === 'ngrok' && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-          >
-            <GlassCard className="mb-6">
-              <h2 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-secondary" />
-                Ngrok Configuration
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-white/70 mb-2">
-                    Ngrok Public URL
-                  </label>
-                  <input
-                    type="text"
-                    name="ngrokUrl"
-                    value={config.ngrokUrl}
-                    onChange={handleChange}
-                    placeholder="https://xxxx-xx-xx-xxx-xx.ngrok.io"
-                    className="w-full px-4 py-3 bg-black/30 border border-glass-border rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary transition-colors"
-                  />
-                  <p className="text-xs text-white/40 mt-1">
-                    Copy from Colab output: https://xxxx.ngrok.io
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-white/70 mb-2">
-                    Ngrok Auth Token (Optional)
-                  </label>
-                  <input
-                    type="password"
-                    name="ngrokToken"
-                    value={config.ngrokToken}
-                    onChange={handleChange}
-                    placeholder="2Kjsh...xxxxx"
-                    className="w-full px-4 py-3 bg-black/30 border border-glass-border rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary transition-colors"
-                  />
-                  <p className="text-xs text-white/40 mt-1">
-                    Only needed if running your own ngrok client
-                  </p>
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-        )}
-
-        {/* Hugging Face Configuration */}
-        {config.mode === 'huggingface' && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-          >
-            <GlassCard className="mb-6">
-              <h2 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-accent" />
-                Hugging Face Configuration
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-white/70 mb-2">
-                    Hugging Face Space URL
-                  </label>
-                  <input
-                    type="text"
-                    name="huggingfaceUrl"
-                    value={config.huggingfaceUrl}
-                    onChange={handleChange}
-                    placeholder="https://your-username-project-datmin.hf.space"
-                    className="w-full px-4 py-3 bg-black/30 border border-glass-border rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-primary transition-colors"
-                  />
-                  <p className="text-xs text-white/40 mt-1">
-                    Your HF Space URL (e.g., https://faqih-project-datmin.hf.space)
-                  </p>
-                </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-        )}
-
-        {/* Common Settings */}
+        {/* Endpoint Settings */}
         <GlassCard className="mb-6">
-          <h2 className="font-space text-xl font-semibold mb-4">
+          <h2 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
+            <Server className="w-5 h-5 text-secondary" />
             Endpoint Settings
           </h2>
-          
+
           <div>
             <label className="block text-sm text-white/70 mb-2">
               Predict Endpoint
@@ -308,19 +226,19 @@ const ApiConfig = () => {
           <h3 className="font-semibold mb-3">Current Active Configuration</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-white/50">Mode:</span>
-              <span className="font-medium capitalize">{config.mode}</span>
+              <span className="text-white/50">Backend:</span>
+              <span className="font-medium">Hugging Face Spaces</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-white/50">Base URL:</span>
+              <span className="text-white/50">Space URL:</span>
               <span className="font-medium text-primary-light truncate max-w-xs">
-                {getActiveUrl() || 'Not configured'}
+                {config.huggingfaceUrl || 'Not configured'}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-white/50">Predict URL:</span>
               <span className="font-medium text-primary-light truncate max-w-xs">
-                {getActiveUrl() ? `${getActiveUrl()}${config.predictEndpoint}` : 'Not configured'}
+                {config.huggingfaceUrl ? `${config.huggingfaceUrl}${config.predictEndpoint}` : 'Not configured'}
               </span>
             </div>
           </div>

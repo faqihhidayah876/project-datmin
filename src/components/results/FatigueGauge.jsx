@@ -3,8 +3,11 @@ import { getGaugeOffset } from '../../utils/helpers';
 import { CLASS_COLORS } from '../../utils/constants';
 
 const FatigueGauge = ({ score, predictedClass, confidence }) => {
-  const offset = getGaugeOffset(score);
-  const color = CLASS_COLORS[predictedClass] || CLASS_COLORS.medium;
+  // ✅ SAFEGUARD
+  const safeScore = typeof score === 'number' ? Math.max(0, Math.min(1, score)) : 0.5;
+  const safeClass = predictedClass || 'medium';
+  const offset = getGaugeOffset(safeScore);
+  const color = CLASS_COLORS[safeClass] || CLASS_COLORS.medium;
 
   return (
     <div className="flex flex-col items-center py-4">
@@ -30,7 +33,7 @@ const FatigueGauge = ({ score, predictedClass, confidence }) => {
           />
         </svg>
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 font-space text-3xl font-bold">
-          {Math.round(score * 100)}%
+          {Math.round(safeScore * 100)}%
         </div>
       </div>
       <span className="mt-2 text-sm text-white/70">Fatigue Level</span>

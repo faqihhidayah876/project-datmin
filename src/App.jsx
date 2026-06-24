@@ -4,7 +4,6 @@ import Footer from './components/common/Footer';
 import HomePage from './pages/HomePage';
 import PredictPage from './pages/PredictPage';
 import AboutPage from './pages/AboutPage';
-import ApiConfig from './components/config/ApiConfig';
 
 function App() {
   return (
@@ -25,7 +24,6 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/predict" element={<PredictPage />} />
-            <Route path="/configure" element={<ApiConfig />} />
             <Route path="/about" element={<AboutPage />} />
           </Routes>
         </main>
