@@ -6,18 +6,18 @@ import { LOGO_URL } from '../utils/constants';
 const developers = [
   {
     name: 'Faqih Hidayah',
-    nim: '2 SI B',
-    jurusan: 'Sistem Informasi',
+    nim: '2 SI-B',
+    jurusan: 'Information System',
     kampus: 'Politeknik Caltex Riau',
-    photo: '', // Tambahkan link foto di sini nanti
+    photo: 'https://i.ibb.co.com/mrPVYWdT/Whats-App-Image-2026-06-20-at-21-29-58.jpg', // Tambahkan link foto di sini nanti
     role: 'Frontend Developer',
   },
   {
     name: 'Muhammad Dzakwan Syafiq',
-    nim: '2 SI B',
-    jurusan: 'Sistem Informasi',
+    nim: '2 SIB',
+    jurusan: 'Information System',
     kampus: 'Politeknik Caltex Riau',
-    photo: '', // Tambahkan link foto di sini nanti
+    photo: 'https://i.ibb.co.com/VhdS84F/IMG-20250601-WA0018.jpg', // Tambahkan link foto di sini nanti
     role: 'Backend Developer',
   },
 ];
