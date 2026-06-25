@@ -53,14 +53,12 @@ const PredictPage = () => {
   const displayError = localError || error;
 
   const handleFileSelect = useCallback((selectedFile, duration) => {
-    console.log('File selected:', selectedFile?.name, 'Duration:', duration);
     setFile(selectedFile);
     setAudioUrl(URL.createObjectURL(selectedFile));
     setLocalError(null);
   }, []);
 
   const handleRecordingComplete = useCallback((recordedFile, recordedUrl) => {
-    console.log('Recording complete:', recordedFile?.name);
     setFile(recordedFile);
     setAudioUrl(recordedUrl);
     setLocalError(null);
@@ -135,11 +133,9 @@ const PredictPage = () => {
         </button>
       </div>
 
-      {/* Upload / Record Section */}
+      {/* Upload / Record Section - Tanpa garis warna atas */}
       <section className="mb-8">
-        <GlassCard className="relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
-          
+        <GlassCard>
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
               <Mic className="w-6 h-6 text-white" />
@@ -263,7 +259,7 @@ const PredictPage = () => {
         </motion.div>
       )}
 
-      {/* Results */}
+      {/* Results - Tanpa garis warna atas */}
       <AnimatePresence>
         {results && (
           <motion.section
@@ -291,8 +287,7 @@ const PredictPage = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <GlassCard className="relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary" />
+              <GlassCard>
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-gradient-to-br from-accent to-orange-400 rounded-xl flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5 text-white" />
@@ -306,8 +301,7 @@ const PredictPage = () => {
                 <ClassificationBadge predictedClass={results.predictedClass} confidence={results.confidence} />
               </GlassCard>
 
-              <GlassCard className="relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary to-primary-light" />
+              <GlassCard>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-gradient-to-br from-secondary to-cyan-400 rounded-xl flex items-center justify-center">
                     <BarChart3 className="w-5 h-5 text-white" />
@@ -320,8 +314,7 @@ const PredictPage = () => {
                 <ProbabilityChart probabilities={results.probabilities} />
               </GlassCard>
 
-              <GlassCard className="md:col-span-2 relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
+              <GlassCard className="md:col-span-2">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
                     <Eye className="w-5 h-5 text-white" />
@@ -352,7 +345,7 @@ const PredictPage = () => {
         )}
       </AnimatePresence>
 
-      {/* History */}
+      {/* History - Tanpa garis warna atas */}
       {history.length > 0 && (
         <section className="mt-8">
           <GlassCard>

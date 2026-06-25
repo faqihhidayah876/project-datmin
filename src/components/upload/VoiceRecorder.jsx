@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Square, Play, Pause, RotateCcw, Save, Volume2, Activity, Timer, AlertCircle } from 'lucide-react';
+import RecordRTC from 'recordrtc';
 import { MAX_AUDIO_DURATION } from '../../utils/constants';
 
 const VoiceRecorder = ({ onRecordingComplete }) => {
@@ -12,16 +13,18 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
   const [volume, setVolume] = useState(0);
   const [permissionStatus, setPermissionStatus] = useState('prompt');
 
-  const mediaRecorderRef = useRef(null);
+  // ✅ RecordRTC refs
+  const recorderRef = useRef(null);
+  const streamRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
-  const streamRef = useRef(null);
-  const chunksRef = useRef([]);
+  const sourceRef = useRef(null);
+  
+  // Visualizer refs
   const timerRef = useRef(null);
   const animationRef = useRef(null);
   const canvasRef = useRef(null);
 
-  // ✅ GANTI maxDuration ke MAX_AUDIO_DURATION (15 detik)
   const maxDuration = MAX_AUDIO_DURATION;
 
   // Check microphone permission
@@ -60,7 +63,7 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     };
   }, [isRecording, isPaused, maxDuration]);
 
-  // Visualize volume
+  // Visualize volume (pakai Web Audio API terpisah untuk visualizer saja)
   const visualizeVolume = useCallback(() => {
     const analyser = analyserRef.current;
     const canvas = canvasRef.current;
@@ -104,63 +107,48 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     draw();
   }, [isRecording]);
 
-  // Start recording
+  // ✅ START RECORDING dengan RecordRTC (WAV murni)
   const startRecording = async () => {
     try {
-      chunksRef.current = [];
-
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      // 1. Minta stream dengan SEMUA filter dimatikan (raw audio)
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100,
+          echoCancellation: false,      // ❌ Matikan
+          autoGainControl: false,       // ❌ Matikan (sangat penting!)
+          noiseSuppression: false,      // ❌ Matikan (sangat penting!)
           channelCount: 1,
+          sampleRate: 16000             // ✅ Samakan dengan backend Librosa
         }
       });
       streamRef.current = stream;
 
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      audioContextRef.current = audioContext;
+      // 2. Setup visualizer (stream terpisah untuk UI)
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audioContextRef.current = audioContext;
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        // Jangan connect ke destination! (biar tidak feedback/echo)
+        analyserRef.current = analyser;
+      } catch (vizErr) {
+        console.warn('Visualizer setup failed:', vizErr);
+      }
 
-      const source = audioContext.createMediaStreamSource(stream);
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      source.connect(analyser);
-      analyserRef.current = analyser;
-
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm') 
-          ? 'audio/webm' 
-          : 'audio/mp4',
+      // 3. ✅ Buat RecordRTC dengan StereoAudioRecorder untuk WAV murni
+      const recorder = new RecordRTC(stream, {
+        type: 'audio',
+        mimeType: 'audio/wav',
+        recorderType: RecordRTC.StereoAudioRecorder, // 🔑 Kunci: paksa WAV PCM
+        numberOfAudioChannels: 1,      // Mono
+        desiredSampRate: 16000,        // Samakan backend
+        disableLogs: true
       });
-      mediaRecorderRef.current = mediaRecorder;
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
+      recorder.startRecording();
+      recorderRef.current = recorder;
 
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
-        const url = URL.createObjectURL(blob);
-        setAudioBlob(blob);
-        setAudioUrl(url);
-
-        if (onRecordingComplete) {
-          const file = new File([blob], `recording-${Date.now()}.webm`, {
-            type: mediaRecorder.mimeType,
-          });
-          onRecordingComplete(file, url);
-        }
-
-        stream.getTracks().forEach(track => track.stop());
-        if (audioContextRef.current) {
-          audioContextRef.current.close();
-        }
-      };
-
-      mediaRecorder.start(100);
       setIsRecording(true);
       setIsPaused(false);
       setRecordingTime(0);
@@ -176,40 +164,85 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     }
   };
 
-  // Stop recording
+  // ✅ STOP RECORDING
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setIsPaused(false);
+    if (!recorderRef.current || !isRecording) return;
 
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+    recorderRef.current.stopRecording(() => {
+      // Ambil blob WAV murni
+      const blob = recorderRef.current.getBlob();
+      
+      // Pastikan type benar
+      const wavBlob = new Blob([blob], { type: 'audio/wav' });
+      const url = URL.createObjectURL(wavBlob);
+      
+      setAudioBlob(wavBlob);
+      setAudioUrl(url);
+
+      // Buat File object untuk dikirim ke backend
+      const file = new File([wavBlob], `recording-${Date.now()}.wav`, {
+        type: 'audio/wav',
+      });
+
+      if (onRecordingComplete) {
+        onRecordingComplete(file, url);
       }
-    }
+
+      // Cleanup
+      cleanup();
+    });
   };
 
-  // Pause/Resume
+  // ✅ PAUSE / RESUME
   const togglePause = () => {
-    if (mediaRecorderRef.current) {
-      if (isPaused) {
-        mediaRecorderRef.current.resume();
-        setIsPaused(false);
-      } else {
-        mediaRecorderRef.current.pause();
-        setIsPaused(true);
-      }
+    if (!recorderRef.current) return;
+    
+    if (isPaused) {
+      recorderRef.current.resumeRecording();
+      setIsPaused(false);
+    } else {
+      recorderRef.current.pauseRecording();
+      setIsPaused(true);
     }
   };
 
-  // Reset
+  // ✅ RESET
   const resetRecording = () => {
-    if (audioUrl) URL.revokeObjectURL(audioUrl);
+    cleanup();
     setAudioBlob(null);
     setAudioUrl(null);
     setRecordingTime(0);
     setVolume(0);
-    chunksRef.current = [];
+  };
+
+  // Cleanup function
+  const cleanup = () => {
+    setIsRecording(false);
+    setIsPaused(false);
+
+    // Stop RecordRTC
+    if (recorderRef.current) {
+      recorderRef.current.destroy();
+      recorderRef.current = null;
+    }
+
+    // Stop stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+
+    // Stop audio context
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    // Stop animation
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
   };
 
   // Format time
@@ -224,6 +257,14 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     if (volume < 70) return 'bg-accent-2';
     return 'bg-accent';
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanup();
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+    };
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -261,6 +302,9 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
               <span className={`w-2 h-2 rounded-full animate-pulse ${isPaused ? 'bg-yellow-400' : 'bg-red-500'}`} />
               <span className="px-2 py-1 bg-black/50 rounded-lg text-xs text-white/70 font-mono">
                 {isPaused ? 'PAUSED' : 'RECORDING'}
+              </span>
+              <span className="px-2 py-1 bg-primary/20 rounded-lg text-xs text-primary-light font-mono">
+                16kHz WAV
               </span>
             </>
           )}
@@ -360,8 +404,8 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
-                    const file = new File([audioBlob], `recording-${Date.now()}.webm`, {
-                      type: audioBlob.type,
+                    const file = new File([audioBlob], `recording-${Date.now()}.wav`, {
+                      type: 'audio/wav',
                     });
                     onRecordingComplete(file, audioUrl);
                   }}
@@ -384,6 +428,7 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
           <li>• Minimize background noise</li>
           <li>• Keep microphone 10-15 cm from your mouth</li>
           <li>• Maximum recording duration: <span className="text-accent-2 font-medium">{maxDuration} seconds</span></li>
+          <li>• Audio saved as <span className="text-green-400 font-medium">16kHz WAV (PCM)</span> for best model accuracy</li>
         </ul>
       </div>
     </div>

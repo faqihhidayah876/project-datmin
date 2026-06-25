@@ -9,16 +9,16 @@ const developers = [
     nim: '2 SI-B',
     jurusan: 'Information System',
     kampus: 'Politeknik Caltex Riau',
-    photo: 'https://i.ibb.co.com/mrPVYWdT/Whats-App-Image-2026-06-20-at-21-29-58.jpg', // Tambahkan link foto di sini nanti
-    role: 'Frontend Developer',
+    photo: 'https://i.ibb.co.com/mrPVYWdT/Whats-App-Image-2026-06-20-at-21-29-58.jpg',
+    role: 'Frontend, Backend, Train Model & Configuration System',
   },
   {
     name: 'Muhammad Dzakwan Syafiq',
-    nim: '2 SIB',
+    nim: '2 SI-B',
     jurusan: 'Information System',
     kampus: 'Politeknik Caltex Riau',
-    photo: 'https://i.ibb.co.com/VhdS84F/IMG-20250601-WA0018.jpg', // Tambahkan link foto di sini nanti
-    role: 'Backend Developer',
+    photo: 'https://i.ibb.co.com/VhdS84F/IMG-20250601-WA0018.jpg',
+    role: 'Report, Analysis & colect dataset',
   },
 ];
 
@@ -39,9 +39,7 @@ const AboutPage = () => {
         <p className="text-white/40">Explainable AI for Emotional Fatigue Classification</p>
       </motion.div>
 
-      <GlassCard className="mb-8 relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary" />
-        
+      <GlassCard className="mb-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
             <BookOpen className="w-6 h-6 text-white" />
@@ -88,8 +86,7 @@ const AboutPage = () => {
       </GlassCard>
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <GlassCard className="relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent" />
+        <GlassCard>
           <h3 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary-light" />
             Model Architecture
@@ -110,8 +107,7 @@ const AboutPage = () => {
           </ul>
         </GlassCard>
 
-        <GlassCard className="relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary to-primary-light" />
+        <GlassCard>
           <h3 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-secondary-light" />
             Audio Features
@@ -154,9 +150,7 @@ const AboutPage = () => {
               viewport={{ once: true }}
               transition={{ delay: index * 0.15 }}
             >
-              <GlassCard className="relative overflow-hidden group hover:border-primary/40 transition-all duration-500">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary" />
-                
+              <GlassCard className="group hover:border-primary/40 transition-all duration-500">
                 <div className="flex flex-col items-center text-center">
                   {/* Photo Placeholder */}
                   <div className="relative w-32 h-32 mb-5 rounded-2xl overflow-hidden ring-2 ring-primary/30 group-hover:ring-primary-light transition-all duration-500">
@@ -216,9 +210,7 @@ const AboutPage = () => {
         viewport={{ once: true }}
         className="mb-8"
       >
-        <GlassCard className="relative overflow-hidden text-center">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
-          
+        <GlassCard className="text-center">
           <div className="py-4">
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
               <Github className="w-8 h-8 text-white" />

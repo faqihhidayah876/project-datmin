@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Activity, Layers, Brain, ArrowRight, Sparkles, Zap, Shield } from 'lucide-react';
+import { Activity, Layers, Brain, ArrowRight, Shield } from 'lucide-react';
 import GlassCard from '../components/common/GlassCard';
 import { LOGO_URL } from '../utils/constants';
 
 const HomePage = () => {
   const stats = [
-    { value: '83.72%', label: 'Model Accuracy', color: 'text-secondary', icon: <Zap className="w-4 h-4" /> },
-    { value: '3', label: 'Fatigue Classes', color: 'text-accent-2', icon: <Layers className="w-4 h-4" /> },
-    { value: 'CNN', label: 'Deep Learning', color: 'text-primary-light', icon: <Brain className="w-4 h-4" /> },
+    { value: '83.72%', label: 'Model Accuracy' },
+    { value: '3', label: 'Fatigue Classes' },
+    { value: 'CNN', label: 'Deep Learning' },
   ];
 
   const features = [
@@ -16,19 +16,16 @@ const HomePage = () => {
       icon: <Brain className="w-7 h-7" />,
       title: 'AI-Powered Analysis',
       description: 'Utilizes YAMNet transfer learning combined with custom acoustic features for precise fatigue detection.',
-      gradient: 'from-primary to-secondary',
     },
     {
       icon: <Activity className="w-7 h-7" />,
       title: 'Real-time Processing',
       description: 'Get instant results with our optimized deep learning pipeline running on Hugging Face Spaces.',
-      gradient: 'from-secondary to-primary-light',
     },
     {
       icon: <Layers className="w-7 h-7" />,
       title: 'XAI Visualization',
       description: 'Understand model decisions through spectrograms and feature importance visualizations.',
-      gradient: 'from-accent to-primary',
     },
   ];
 
@@ -36,7 +33,6 @@ const HomePage = () => {
     <div className="pt-20 pb-12">
       {/* Hero Section */}
       <section className="text-center py-20 px-4 relative overflow-hidden">
-        {/* Background glow effects */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-20 right-20 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] pointer-events-none" />
         
@@ -47,11 +43,7 @@ const HomePage = () => {
           className="relative z-10 mb-8"
         >
           <div className="w-24 h-24 mx-auto mb-6 rounded-2xl overflow-hidden ring-4 ring-primary/30 glow-purple">
-            <img 
-              src={LOGO_URL} 
-              alt="Explainable AI Logo" 
-              className="w-full h-full object-cover"
-            />
+            <img src={LOGO_URL} alt="Explainable AI Logo" className="w-full h-full object-cover" />
           </div>
         </motion.div>
 
@@ -60,9 +52,7 @@ const HomePage = () => {
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary/10 border border-primary/20 rounded-full text-sm text-primary-light mb-8 backdrop-blur-sm"
         >
-          <Sparkles className="w-4 h-4 animate-pulse" />
           CNN-based Emotional Fatigue Classification System
-          <Sparkles className="w-4 h-4 animate-pulse" />
         </motion.div>
 
         <motion.h1
@@ -101,7 +91,7 @@ const HomePage = () => {
           </Link>
         </motion.div>
 
-        {/* Stats */}
+        {/* Stats - Tanpa ikon */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -115,19 +105,16 @@ const HomePage = () => {
               whileHover={{ scale: 1.05, y: -5 }}
               transition={{ delay: i * 0.1 }}
             >
-              <div className={`inline-flex items-center gap-2 text-sm ${stat.color} mb-2`}>
-                {stat.icon}
-                <span>{stat.label}</span>
-              </div>
-              <div className={`font-space text-4xl md:text-5xl font-bold ${stat.color}`}>
+              <div className="font-space text-4xl md:text-5xl font-bold text-primary-light mb-2">
                 {stat.value}
               </div>
+              <div className="text-sm text-white/50">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Card tanpa garis warna atas */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <motion.div
           initial={{ opacity: 0 }}
@@ -148,10 +135,8 @@ const HomePage = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.15 }}
             >
-              <GlassCard className="h-full group relative overflow-hidden">
-                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${feature.gradient}`} />
-                
-                <div className={`w-14 h-14 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-500`}>
+              <GlassCard className="h-full group">
+                <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
                 </div>
                 

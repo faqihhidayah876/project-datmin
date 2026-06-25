@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 const LoadingSpinner = ({ 
   text = 'Analyzing Audio...', 
   subtext = 'Processing audio features and generating prediction',
-  progress = null, // { type: 'upload'|'processing', progress: 0-100 }
+  progress = null,
 }) => {
   const [dots, setDots] = useState('');
 
@@ -22,8 +22,8 @@ const LoadingSpinner = ({
   // Calculate overall progress
   const getProgressPercent = () => {
     if (!progress) return 0;
-    if (progress.type === 'upload') return progress.progress * 0.3; // Upload = 30%
-    if (progress.type === 'processing') return 30 + (progress.progress * 0.7); // Processing = 70%
+    if (progress.type === 'upload') return progress.progress * 0.3;
+    if (progress.type === 'processing') return 30 + (progress.progress * 0.7);
     return 0;
   };
 
@@ -31,11 +31,11 @@ const LoadingSpinner = ({
   const progressStage = progress?.type || 'connecting';
 
   const stages = [
-    { id: 'connecting', label: 'Connecting to server', icon: '🔗' },
-    { id: 'upload', label: 'Uploading audio file', icon: '☁️' },
-    { id: 'processing', label: 'Processing audio features', icon: '⚙️' },
-    { id: 'predicting', label: 'Running CNN prediction', icon: '🧠' },
-    { id: 'finalizing', label: 'Generating visualization', icon: '✨' },
+    { id: 'connecting', label: 'Connecting to server' },
+    { id: 'upload', label: 'Uploading audio file' },
+    { id: 'processing', label: 'Processing audio features' },
+    { id: 'predicting', label: 'Running CNN prediction' },
+    { id: 'finalizing', label: 'Generating visualization' },
   ];
 
   const getCurrentStageIndex = () => {
@@ -81,8 +81,8 @@ const LoadingSpinner = ({
           <motion.div
             className="absolute inset-0 rounded-full border-4 border-transparent"
             style={{
-              borderTopColor: '#6C5DD3',
-              borderRightColor: '#8B7FE8',
+              borderTopColor: '#7C3AED',
+              borderRightColor: '#A78BFA',
             }}
             animate={{ rotate: 360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
@@ -92,8 +92,8 @@ const LoadingSpinner = ({
           <motion.div
             className="absolute inset-3 rounded-full border-4 border-transparent"
             style={{
-              borderBottomColor: '#00D4AA',
-              borderLeftColor: '#00B4D8',
+              borderBottomColor: '#8B5CF6',
+              borderLeftColor: '#C4B5FD',
             }}
             animate={{ rotate: -360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -103,8 +103,8 @@ const LoadingSpinner = ({
           <motion.div
             className="absolute inset-6 rounded-full border-4 border-transparent"
             style={{
-              borderTopColor: '#FF6B9D',
-              borderRightColor: '#FFB347',
+              borderTopColor: '#EC4899',
+              borderRightColor: '#F59E0B',
             }}
             animate={{ rotate: 360 }}
             transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
@@ -112,7 +112,7 @@ const LoadingSpinner = ({
 
           {/* Center pulse */}
           <motion.div
-            className="absolute inset-9 rounded-full bg-gradient-to-br from-primary to-accent"
+            className="absolute inset-9 rounded-full bg-gradient-to-br from-primary to-secondary"
             animate={{ 
               scale: [1, 1.2, 1],
               opacity: [0.5, 1, 0.5],
@@ -181,7 +181,7 @@ const LoadingSpinner = ({
                       ? 'bg-primary/20 text-primary-light animate-pulse'
                       : 'bg-white/5 text-white/30'
                 }`}>
-                  {isCompleted ? '✓' : stage.icon}
+                  {isCompleted ? '✓' : (index + 1)}
                 </div>
                 <span className={`text-sm ${
                   isActive 
@@ -211,7 +211,7 @@ const LoadingSpinner = ({
           {Array.from({ length: 30 }).map((_, i) => (
             <motion.div
               key={i}
-              className="w-1 bg-gradient-to-t from-primary/50 to-accent/50 rounded-full"
+              className="w-1 bg-gradient-to-t from-primary/50 to-secondary/50 rounded-full"
               animate={{
                 height: [`${20 + Math.random() * 60}%`, `${40 + Math.random() * 60}%`, `${20 + Math.random() * 60}%`],
               }}
