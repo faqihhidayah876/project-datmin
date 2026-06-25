@@ -1,15 +1,138 @@
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Activity, Layers, Brain, ArrowRight, Shield } from 'lucide-react';
+import { 
+  Activity, 
+  Layers, 
+  Brain, 
+  ArrowRight, 
+  Shield,
+  LayoutDashboard,
+  Database,
+  Server,
+  Monitor,
+  Cloud,
+  FileAudio,
+  TrendingUp,
+  BarChart3,
+  PieChart,
+  Clock
+} from 'lucide-react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  Legend
+} from 'recharts';
 import GlassCard from '../components/common/GlassCard';
 import { LOGO_URL } from '../utils/constants';
+import { useAudioAnalysis } from '../hooks/useAudioAnalysis';
+
+// Flowchart steps
+const flowchartSteps = [
+  {
+    id: 1,
+    title: 'Dataset Engineering',
+    subtitle: 'Data Collection & Preprocessing',
+    icon: <Database className="w-6 h-6" />,
+    details: [
+      'Collect Audio Dataset from Responden',
+      'Data Understanding & EDA',
+      'Data Preprocessing',
+      'Feature Extraction (MFCC, Spectrogram)'
+    ],
+    color: '#7C3AED',
+  },
+  {
+    id: 2,
+    title: 'Deep Learning Model',
+    subtitle: 'CNN + Transfer Learning',
+    icon: <Brain className="w-6 h-6" />,
+    details: [
+      'YAMNet Feature Extraction',
+      'CNN Architecture Design',
+      'Model Training & Validation',
+      'Hyperparameter Tuning'
+    ],
+    color: '#8B5CF6',
+  },
+  {
+    id: 3,
+    title: 'Backend System',
+    subtitle: 'API & Model Serving',
+    icon: <Server className="w-6 h-6" />,
+    details: [
+      'Flask REST API Development',
+      'Model Integration & Inference',
+      'Audio Processing Pipeline',
+      'Error Handling & Logging'
+    ],
+    color: '#EC4899',
+  },
+  {
+    id: 4,
+    title: 'Frontend System',
+    subtitle: 'React Dashboard',
+    icon: <Monitor className="w-6 h-6" />,
+    details: [
+      'Interactive Dashboard Design',
+      'Audio Upload & Recording',
+      'Real-time Visualization',
+      'Responsive UI/UX'
+    ],
+    color: '#F59E0B',
+  },
+  {
+    id: 5,
+    title: 'Deployment',
+    subtitle: 'Cloud Production',
+    icon: <Cloud className="w-6 h-6" />,
+    details: [
+      'Hugging Face Spaces Deployment',
+      'CI/CD Pipeline',
+      'Performance Monitoring',
+      'Scalability Testing'
+    ],
+    color: '#10B981',
+  },
+];
 
 const HomePage = () => {
-  const stats = [
-    { value: '83.72%', label: 'Model Accuracy' },
-    { value: '3', label: 'Fatigue Classes' },
-    { value: 'CNN', label: 'Deep Learning' },
-  ];
+  const { history } = useAudioAnalysis();
+  const [stats, setStats] = useState({
+    totalAnalyzed: 0,
+    lowCount: 0,
+    mediumCount: 0,
+    highCount: 0,
+    avgConfidence: 0,
+  });
+
+  // Calculate stats from history
+  useEffect(() => {
+    if (history.length > 0) {
+      const low = history.filter(h => h.predictedClass === 'low').length;
+      const medium = history.filter(h => h.predictedClass === 'medium').length;
+      const high = history.filter(h => h.predictedClass === 'high').length;
+      const avgConf = history.reduce((sum, h) => sum + h.confidence, 0) / history.length;
+
+      setStats({
+        totalAnalyzed: history.length,
+        lowCount: low,
+        mediumCount: medium,
+        highCount: high,
+        avgConfidence: avgConf,
+      });
+    }
+  }, [history]);
 
   const features = [
     {
@@ -27,6 +150,34 @@ const HomePage = () => {
       title: 'XAI Visualization',
       description: 'Understand model decisions through spectrograms and feature importance visualizations.',
     },
+  ];
+
+  // Mock data for trend chart
+  const trendData = history.length > 0 
+    ? history.slice(0, 10).map((h, i) => ({
+        name: `#${i + 1}`,
+        confidence: h.confidence,
+      })).reverse()
+    : [
+        { name: '#1', confidence: 75.2 },
+        { name: '#2', confidence: 82.1 },
+        { name: '#3', confidence: 91.5 },
+        { name: '#4', confidence: 78.3 },
+        { name: '#5', confidence: 85.7 },
+      ];
+
+  // Pie chart data
+  const pieData = [
+    { name: 'Low Fatigue', value: stats.lowCount || 1, color: '#00D4AA' },
+    { name: 'Medium Fatigue', value: stats.mediumCount || 1, color: '#FFB347' },
+    { name: 'High Fatigue', value: stats.highCount || 1, color: '#FF6B9D' },
+  ];
+
+  // Class distribution bar data
+  const classData = [
+    { name: 'Low', count: stats.lowCount || 0, fill: '#00D4AA' },
+    { name: 'Medium', count: stats.mediumCount || 0, fill: '#FFB347' },
+    { name: 'High', count: stats.highCount || 0, fill: '#FF6B9D' },
   ];
 
   return (
@@ -90,31 +241,9 @@ const HomePage = () => {
             Learn More
           </Link>
         </motion.div>
-
-        {/* Stats - Tanpa ikon */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex flex-wrap justify-center gap-8 md:gap-16 mt-20"
-        >
-          {stats.map((stat, i) => (
-            <motion.div 
-              key={stat.label} 
-              className="text-center p-6 rounded-2xl bg-glass border border-glass-border hover:border-primary/30 transition-all duration-500"
-              whileHover={{ scale: 1.05, y: -5 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <div className="font-space text-4xl md:text-5xl font-bold text-primary-light mb-2">
-                {stat.value}
-              </div>
-              <div className="text-sm text-white/50">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
       </section>
 
-      {/* Features Section - Card tanpa garis warna atas */}
+      {/* Key Features Section */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         <motion.div
           initial={{ opacity: 0 }}
@@ -149,6 +278,232 @@ const HomePage = () => {
               </GlassCard>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* DASHBOARD STATS - Total Data Analyzed & Prediction Summary */}
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="mb-8"
+        >
+          <h2 className="font-space text-3xl font-bold mb-2 flex items-center gap-3">
+            <LayoutDashboard className="w-7 h-7 text-primary-light" />
+            Statistic Overview
+          </h2>
+          <p className="text-white/40 text-sm">Real-time statistic and prediction summary</p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {[
+            { 
+              label: 'Total Analyzed', 
+              value: stats.totalAnalyzed, 
+              icon: <FileAudio className="w-5 h-5" />,
+              color: 'text-primary-light',
+              bg: 'bg-primary/10',
+            },
+            { 
+              label: 'Avg Confidence', 
+              value: `${stats.avgConfidence.toFixed(1)}%`, 
+              icon: <Activity className="w-5 h-5" />,
+              color: 'text-secondary-light',
+              bg: 'bg-secondary/10',
+            },
+            { 
+              label: 'Low Fatigue', 
+              value: stats.lowCount, 
+              icon: <TrendingUp className="w-5 h-5" />,
+              color: 'text-green-400',
+              bg: 'bg-green-500/10',
+            },
+            { 
+              label: 'High Fatigue', 
+              value: stats.highCount, 
+              icon: <TrendingUp className="w-5 h-5 rotate-180" />,
+              color: 'text-accent',
+              bg: 'bg-accent/10',
+            },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <GlassCard className="h-full">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`p-2 rounded-lg ${stat.bg}`}>
+                    <span className={stat.color}>{stat.icon}</span>
+                  </div>
+                  <span className="text-xs text-white/40 uppercase tracking-wider">{stat.label}</span>
+                </div>
+                <div className="font-space text-3xl font-bold text-white">{stat.value}</div>
+              </GlassCard>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Prediction Summary Charts */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <GlassCard>
+            <h3 className="font-space text-lg font-semibold mb-4 text-white/80">Confidence Trend</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} />
+                  <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1a1a2e', 
+                      border: '1px solid rgba(124,58,237,0.3)',
+                      borderRadius: '12px',
+                      color: '#fff'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="confidence" 
+                    stroke="#8B5CF6" 
+                    strokeWidth={2}
+                    dot={{ fill: '#8B5CF6', r: 4 }}
+                    activeDot={{ r: 6, fill: '#A78BFA' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
+
+          <GlassCard>
+            <h3 className="font-space text-lg font-semibold mb-4 text-white/80">Class Distribution</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <RePieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#1a1a2e', 
+                      border: '1px solid rgba(124,58,237,0.3)',
+                      borderRadius: '12px',
+                      color: '#fff'
+                    }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    iconType="circle"
+                    formatter={(value) => <span className="text-white/60 text-xs">{value}</span>}
+                  />
+                </RePieChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
+        </div>
+
+        <GlassCard className="mt-6">
+          <h3 className="font-space text-lg font-semibold mb-4 text-white/80">Prediction Count by Class</h3>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={classData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} />
+                <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1a1a2e', 
+                    border: '1px solid rgba(124,58,237,0.3)',
+                    borderRadius: '12px',
+                    color: '#fff'
+                  }}
+                />
+                <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                  {classData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </GlassCard>
+      </section>
+
+      {/* FLOWCHART / DIAGRAM ALUR */}
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="mb-10"
+        >
+          <h2 className="font-space text-3xl font-bold mb-2 flex items-center gap-3">
+            <BarChart3 className="w-7 h-7 text-primary-light" />
+            System Architecture Flow
+          </h2>
+          <p className="text-white/40 text-sm">End-to-end pipeline from dataset to deployment</p>
+        </motion.div>
+
+        <div className="relative">
+          {/* Connecting Line - Desktop only */}
+          <div className="hidden lg:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-secondary to-accent z-0" />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
+            {flowchartSteps.map((step, i) => (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+              >
+                <GlassCard className="h-full group hover:border-primary/40 transition-all duration-500 relative">
+                  {/* Step Number */}
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white mb-3"
+                    style={{ backgroundColor: step.color }}
+                  >
+                    {step.id}
+                  </div>
+                  
+                  {/* Icon */}
+                  <div 
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                    style={{ backgroundColor: `${step.color}30` }}
+                  >
+                    <span style={{ color: step.color }}>{step.icon}</span>
+                  </div>
+
+                  <h3 className="font-space text-sm font-bold text-white mb-1">{step.title}</h3>
+                  <p className="text-xs text-white/40 mb-3">{step.subtitle}</p>
+
+                  {/* Details */}
+                  <ul className="space-y-1.5">
+                    {step.details.map((detail, j) => (
+                      <li key={j} className="text-xs text-white/50 flex items-start gap-1.5">
+                        <span className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0" style={{ backgroundColor: step.color }} />
+                        {detail}
+                      </li>
+                    ))}
+                  </ul>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
