@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { CLASSES, CLASS_COLORS, CLASS_LABELS } from '../../utils/constants';
+import { CLASSES, CLASS_COLORS } from '../../utils/constants';
+import { useApp } from '../../context/AppContext';
 
 const ProbabilityChart = ({ probabilities }) => {
-  // ✅ SAFEGUARD: Pastikan probabilities valid
+  const { t } = useApp();
+
   if (!probabilities || !Array.isArray(probabilities)) {
-    console.warn('ProbabilityChart: invalid probabilities', probabilities);
     return (
       <div className="p-4 text-center text-white/50 text-sm">
         Probability data not available
@@ -12,7 +13,6 @@ const ProbabilityChart = ({ probabilities }) => {
     );
   }
 
-  // Build probability map dengan safe access
   const probMap = probabilities.reduce((acc, item) => {
     if (item && item.class) {
       acc[item.class] = typeof item.probability === 'number' ? item.probability : 0;
@@ -30,7 +30,7 @@ const ProbabilityChart = ({ probabilities }) => {
         return (
           <div key={cls} className="flex items-center gap-3">
             <span className="w-20 text-sm font-medium text-white/70 uppercase">
-              {cls}
+              {t(cls)}
             </span>
             <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
               <motion.div

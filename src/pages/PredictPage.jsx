@@ -13,9 +13,16 @@ import {
   UploadCloud,
   Radio,
   Loader2,
-  Sparkles
+  Sparkles,
+  FileText,
+  Heart,
+  BrainCircuit,
+  Lightbulb,
+  GitCommit
 } from 'lucide-react';
 import { useAudioAnalysis } from '../hooks/useAudioAnalysis';
+import { useApp } from '../context/AppContext';
+import { generatePDFReport } from '../utils/pdfExport';
 import UploadZone from '../components/upload/UploadZone';
 import AudioPreview from '../components/upload/AudioPreview';
 import VoiceRecorder from '../components/upload/VoiceRecorder';
@@ -25,6 +32,9 @@ import FatigueGauge from '../components/results/FatigueGauge';
 import ClassificationBadge from '../components/results/ClassificationBadge';
 import ProbabilityChart from '../components/results/ProbabilityChart';
 import FeatureImportance from '../components/results/FeatureImportance';
+import LimeExplanation from '../components/results/LimeExplanation';
+import ShapExplanation from '../components/results/ShapExplanation';
+import HealthRecommendations from '../components/results/HealthRecommendations';
 import { LOGO_URL } from '../utils/constants';
 
 const SpectrogramDisplay = React.lazy(() => 
@@ -47,12 +57,15 @@ const PredictPage = () => {
   const [file, setFile] = useState(null);
   const [audioUrl, setAudioUrl] = useState(null);
   const [localError, setLocalError] = useState(null);
+  const [xaiTab, setXaiTab] = useState('lime');
+  const [pdfLoading, setPdfLoading] = useState(false);
 
+  const { t } = useApp();
   const { results, history, loading, error, connected, progress, analyzeAudio, checkApiConnection, clearHistory } = useAudioAnalysis();
 
   const displayError = localError || error;
 
-  const handleFileSelect = useCallback((selectedFile, duration) => {
+  const handleFileSelect = useCallback((selectedFile) => {
     setFile(selectedFile);
     setAudioUrl(URL.createObjectURL(selectedFile));
     setLocalError(null);
@@ -73,19 +86,19 @@ const PredictPage = () => {
 
   const handleAnalyze = async () => {
     if (!file) {
-      setLocalError('No file selected. Please upload or record audio first.');
+      setLocalError(t('error_no_file'));
       return;
     }
     setLocalError(null);
     try {
       await analyzeAudio(file);
     } catch (err) {
-      setLocalError(err.message || 'Analysis failed.');
+      setLocalError(err.message || t('error_analysis_failed'));
     }
   };
 
   const handleClearHistory = () => {
-    if (window.confirm('Clear all analysis history?')) clearHistory();
+    if (window.confirm(t('btn_clear') + ' all analysis history?')) clearHistory();
   };
 
   const handleExportResults = () => {
@@ -99,9 +112,21 @@ const PredictPage = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadPDF = async () => {
+    if (!results) return;
+    setPdfLoading(true);
+    try {
+      await generatePDFReport(results, file?.name, t);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      setLocalError('Failed to generate PDF. Please try again.');
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
   return (
     <div className="pt-24 pb-12 px-4 max-w-7xl mx-auto">
-      {/* Header dengan Logo */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -111,12 +136,11 @@ const PredictPage = () => {
           <img src={LOGO_URL} alt="Explainable AI" className="w-full h-full object-cover" />
         </div>
         <h1 className="font-space text-3xl md:text-4xl font-bold gradient-text-purple text-glow">
-          Explainable AI
+          {t('predict_title')}
         </h1>
-        <p className="text-white/40 text-sm mt-2">Emotional Fatigue Classification</p>
+        <p className="text-white/40 text-sm mt-2">{t('predict_subtitle')}</p>
       </motion.div>
 
-      {/* Connection Status */}
       <div className="flex justify-end mb-4">
         <button
           onClick={checkApiConnection}
@@ -133,7 +157,7 @@ const PredictPage = () => {
         </button>
       </div>
 
-      {/* Upload / Record Section - Tanpa garis warna atas */}
+      {/* ===== AUDIO INPUT CARD ===== */}
       <section className="mb-8">
         <GlassCard>
           <div className="flex items-center gap-4 mb-6">
@@ -141,16 +165,15 @@ const PredictPage = () => {
               <Mic className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="font-space text-2xl font-semibold">Audio Input</h2>
-              <p className="text-white/40 text-sm">Upload or record audio for fatigue analysis</p>
+              <h2 className="font-space text-2xl font-semibold">{t('audio_input_title')}</h2>
+              <p className="text-white/40 text-sm">{t('audio_input_desc')}</p>
             </div>
           </div>
 
-          {/* Tab Switcher */}
           <div className="flex p-1 bg-black/30 rounded-xl mb-6 backdrop-blur-sm">
             {[
-              { id: 'upload', icon: <UploadCloud className="w-4 h-4" />, label: 'Upload File' },
-              { id: 'record', icon: <Radio className="w-4 h-4" />, label: 'Record Voice' },
+              { id: 'upload', icon: <UploadCloud className="w-4 h-4" />, label: t('tab_upload') },
+              { id: 'record', icon: <Radio className="w-4 h-4" />, label: t('tab_record') },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -189,9 +212,9 @@ const PredictPage = () => {
                       className="btn-primary w-full mt-6 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {loading ? (
-                        <><Loader2 className="w-5 h-5 animate-spin" /> Analyzing...</>
+                        <><Loader2 className="w-5 h-5 animate-spin" /> {t('btn_analyzing')}</>
                       ) : (
-                        <><Sparkles className="w-5 h-5" /> Analyze Fatigue</>
+                        <><Sparkles className="w-5 h-5" /> {t('btn_analyze')}</>
                       )}
                     </motion.button>
                   </>
@@ -218,9 +241,9 @@ const PredictPage = () => {
                       className="btn-primary w-full mt-6 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {loading ? (
-                        <><Loader2 className="w-5 h-5 animate-spin" /> Analyzing...</>
+                        <><Loader2 className="w-5 h-5 animate-spin" /> {t('btn_analyzing')}</>
                       ) : (
-                        <><Sparkles className="w-5 h-5" /> Analyze Fatigue</>
+                        <><Sparkles className="w-5 h-5" /> {t('btn_analyze')}</>
                       )}
                     </motion.button>
                   </>
@@ -231,18 +254,78 @@ const PredictPage = () => {
         </GlassCard>
       </section>
 
-      {/* Loading */}
+      {/* ===== HISTORY CARD - SELALU MUNCUL DI BAWAH UPLOAD ===== */}
+      <section className="mb-8">
+        <GlassCard>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+                <PieChart className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="font-space text-2xl font-semibold">{t('history_title')}</h2>
+                <p className="text-white/40 text-sm">{t('history_subtitle')}</p>
+              </div>
+            </div>
+            {history.length > 0 && (
+              <button
+                onClick={handleClearHistory}
+                className="flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 rounded-xl text-sm text-accent hover:bg-accent/20 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" /> {t('btn_clear')}
+              </button>
+            )}
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-glass-border">
+                  {[t('col_time'), t('col_file'), t('col_prediction'), t('col_confidence')].map(h => (
+                    <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-white/40 uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {history.length > 0 ? (
+                  history.map((item) => (
+                    <tr key={item.id} className="border-b border-glass-border/30 hover:bg-white/5 transition-colors">
+                      <td className="py-3 px-4 text-sm text-white/60">{new Date(item.timestamp).toLocaleString()}</td>
+                      <td className="py-3 px-4 text-sm text-white/60">{item.fileName}</td>
+                      <td className="py-3 px-4">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                          item.predictedClass === 'low' ? 'bg-green-500/15 text-green-400' :
+                          item.predictedClass === 'medium' ? 'bg-yellow-500/15 text-yellow-400' :
+                          'bg-red-500/15 text-red-400'
+                        }`}>
+                          {item.predictedClass.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-white/60">{item.confidence.toFixed(2)}%</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-sm text-white/30">
+                      {t('history_empty') || 'No analysis history yet. Upload or record audio to get started.'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </section>
+
       <AnimatePresence>
         {loading && (
           <LoadingSpinner 
-            text="Analyzing Audio"
-            subtext="Processing audio features with Explainable AI"
+            text={t('loading_title')}
+            subtext={t('loading_subtitle')}
             progress={progress}
           />
         )}
       </AnimatePresence>
 
-      {/* Error */}
       {displayError && !loading && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -259,7 +342,7 @@ const PredictPage = () => {
         </motion.div>
       )}
 
-      {/* Results - Tanpa garis warna atas */}
+      {/* ===== ANALYSIS RESULTS ===== */}
       <AnimatePresence>
         {results && (
           <motion.section
@@ -268,22 +351,32 @@ const PredictPage = () => {
             exit={{ opacity: 0, y: -30 }}
             className="mb-8"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                   <PieChart className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="font-space text-2xl font-semibold">Analysis Results</h2>
-                  <p className="text-white/40 text-sm">Explainable AI fatigue classification</p>
+                  <h2 className="font-space text-2xl font-semibold">{t('results_title')}</h2>
+                  <p className="text-white/40 text-sm">{t('results_subtitle')}</p>
                 </div>
               </div>
-              <button
-                onClick={handleExportResults}
-                className="flex items-center gap-2 px-4 py-2 bg-glass border border-glass-border rounded-xl text-sm text-white/60 hover:text-white hover:border-primary-light/50 transition-all"
-              >
-                <Download className="w-4 h-4" /> Export JSON
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={pdfLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-glass border border-glass-border rounded-xl text-sm text-white/60 hover:text-white hover:border-primary-light/50 transition-all disabled:opacity-50"
+                >
+                  <FileText className="w-4 h-4" /> 
+                  {pdfLoading ? 'Generating...' : t('btn_download_pdf')}
+                </button>
+                <button
+                  onClick={handleExportResults}
+                  className="flex items-center gap-2 px-4 py-2 bg-glass border border-glass-border rounded-xl text-sm text-white/60 hover:text-white hover:border-primary-light/50 transition-all"
+                >
+                  <Download className="w-4 h-4" /> {t('btn_export_json')}
+                </button>
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -293,8 +386,8 @@ const PredictPage = () => {
                     <CheckCircle2 className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Fatigue Level</h3>
-                    <span className="text-xs text-white/40">Classification Result</span>
+                    <h3 className="font-semibold">{t('fatigue_level')}</h3>
+                    <span className="text-xs text-white/40">{t('classification_result')}</span>
                   </div>
                 </div>
                 <FatigueGauge score={results.gaugeScore} predictedClass={results.predictedClass} confidence={results.confidence} />
@@ -307,8 +400,8 @@ const PredictPage = () => {
                     <BarChart3 className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Probability Distribution</h3>
-                    <span className="text-xs text-white/40">Per Class Confidence</span>
+                    <h3 className="font-semibold">{t('prob_distribution')}</h3>
+                    <span className="text-xs text-white/40">{t('per_class_conf')}</span>
                   </div>
                 </div>
                 <ProbabilityChart probabilities={results.probabilities} />
@@ -320,8 +413,8 @@ const PredictPage = () => {
                     <Eye className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Audio Spectrogram</h3>
-                    <span className="text-xs text-white/40">Frequency-Time Visualization</span>
+                    <h3 className="font-semibold">{t('spectrogram_title')}</h3>
+                    <span className="text-xs text-white/40">{t('spectrogram_subtitle')}</span>
                   </div>
                 </div>
                 <Suspense fallback={<SpectrogramFallback />}>
@@ -329,11 +422,88 @@ const PredictPage = () => {
                 </Suspense>
                 <FeatureImportance featureValues={results.features} />
               </GlassCard>
+
+              <GlassCard className="md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+                    <BrainCircuit className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">XAI Explanation</h3>
+                    <span className="text-xs text-white/40">Model interpretability visualization</span>
+                  </div>
+
+                  <div className="flex p-0.5 bg-black/30 rounded-lg">
+                    {[
+                      { id: 'lime', icon: <Lightbulb className="w-3.5 h-3.5" />, label: 'LIME' },
+                      { id: 'shap', icon: <GitCommit className="w-3.5 h-3.5" />, label: 'SHAP' },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setXaiTab(tab.id)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                          xaiTab === tab.id
+                            ? 'bg-primary/20 text-primary-light border border-primary/30'
+                            : 'text-white/40 hover:text-white/70'
+                        }`}
+                      >
+                        {tab.icon}
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {xaiTab === 'lime' ? (
+                    <motion.div
+                      key="lime"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-primary-light" />
+                        {t('lime_title')}
+                      </h4>
+                      <LimeExplanation predictedClass={results.predictedClass} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="shap"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
+                        <GitCommit className="w-4 h-4 text-secondary-light" />
+                        {t('shap_title')}
+                      </h4>
+                      <ShapExplanation predictedClass={results.predictedClass} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </GlassCard>
+
+              <GlassCard className="md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-400 rounded-xl flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{t('health_title')}</h3>
+                    <span className="text-xs text-white/40">{t('health_subtitle')}</span>
+                  </div>
+                </div>
+                <HealthRecommendations predictedClass={results.predictedClass} />
+              </GlassCard>
             </div>
 
             <GlassCard className="mt-6">
               <div className="flex items-center gap-2 mb-4 text-sm text-white/40">
-                <Code className="w-4 h-4" /> API Response (JSON)
+                <Code className="w-4 h-4" /> {t('api_response')}
               </div>
               <div className="bg-black/30 rounded-xl p-4 overflow-x-auto border border-white/5">
                 <pre className="text-xs text-white/50 font-mono whitespace-pre-wrap">
@@ -344,60 +514,6 @@ const PredictPage = () => {
           </motion.section>
         )}
       </AnimatePresence>
-
-      {/* History - Tanpa garis warna atas */}
-      {history.length > 0 && (
-        <section className="mt-8">
-          <GlassCard>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                  <PieChart className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="font-space text-2xl font-semibold">History</h2>
-                  <p className="text-white/40 text-sm">Previous analysis results</p>
-                </div>
-              </div>
-              <button
-                onClick={handleClearHistory}
-                className="flex items-center gap-2 px-4 py-2 bg-accent/10 border border-accent/30 rounded-xl text-sm text-accent hover:bg-accent/20 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" /> Clear
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-glass-border">
-                    {['Time', 'File', 'Prediction', 'Confidence'].map(h => (
-                      <th key={h} className="text-left py-3 px-4 text-xs font-semibold text-white/40 uppercase tracking-wider">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((item) => (
-                    <tr key={item.id} className="border-b border-glass-border/30 hover:bg-white/5 transition-colors">
-                      <td className="py-3 px-4 text-sm text-white/60">{new Date(item.timestamp).toLocaleString()}</td>
-                      <td className="py-3 px-4 text-sm text-white/60">{item.fileName}</td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                          item.predictedClass === 'low' ? 'bg-green-500/15 text-green-400' :
-                          item.predictedClass === 'medium' ? 'bg-yellow-500/15 text-yellow-400' :
-                          'bg-red-500/15 text-red-400'
-                        }`}>
-                          {item.predictedClass.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-white/60">{item.confidence.toFixed(2)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </GlassCard>
-        </section>
-      )}
     </div>
   );
 };

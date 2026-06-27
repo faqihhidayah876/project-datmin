@@ -2,27 +2,53 @@ import { motion } from 'framer-motion';
 import { Server, Code, Layers, Brain, BookOpen, Sparkles, Github, GraduationCap, User, ExternalLink } from 'lucide-react';
 import GlassCard from '../components/common/GlassCard';
 import { LOGO_URL } from '../utils/constants';
-
-const developers = [
-  {
-    name: 'Faqih Hidayah',
-    nim: '2 SI-B',
-    jurusan: 'Information System',
-    kampus: 'Politeknik Caltex Riau',
-    photo: 'https://i.ibb.co.com/mrPVYWdT/Whats-App-Image-2026-06-20-at-21-29-58.jpg',
-    role: 'Frontend, Backend, Train Model & Configuration System',
-  },
-  {
-    name: 'Muhammad Dzakwan Syafiq',
-    nim: '2 SI-B',
-    jurusan: 'Information System',
-    kampus: 'Politeknik Caltex Riau',
-    photo: 'https://i.ibb.co.com/VhdS84F/IMG-20250601-WA0018.jpg',
-    role: 'Report, Analysis & colect dataset',
-  },
-];
+import { useApp } from '../context/AppContext';
 
 const AboutPage = () => {
+  const { t } = useApp();
+
+  const developers = [
+    {
+      name: 'Faqih Hidayah',
+      nim: '2 SI-B',
+      jurusan: 'Information System',
+      kampus: 'Politeknik Caltex Riau',
+      photo: 'https://i.ibb.co.com/mrPVYWdT/Whats-App-Image-2026-06-20-at-21-29-58.jpg',
+      role: 'Frontend, Backend, Train Model & Configuration System',
+    },
+    {
+      name: 'Muhammad Dzakwan Syafiq',
+      nim: '2 SI-B',
+      jurusan: 'Information System',
+      kampus: 'Politeknik Caltex Riau',
+      photo: 'https://i.ibb.co.com/VhdS84F/IMG-20250601-WA0018.jpg',
+      role: 'Report, Analysis & colect dataset',
+    },
+  ];
+
+  const techStack = [
+    { icon: <Server className="w-4 h-4" />, label: t('about_backend'), value: 'Flask + Hugging Face Spaces', color: 'text-primary-light' },
+    { icon: <Code className="w-4 h-4" />, label: t('about_framework'), value: 'TensorFlow/Keras', color: 'text-secondary-light' },
+    { icon: <Layers className="w-4 h-4" />, label: t('about_model'), value: 'YAMNet + MLP', color: 'text-accent' },
+    { icon: <Brain className="w-4 h-4" />, label: t('about_frontend'), value: 'React.js + Tailwind CSS', color: 'text-accent-2' },
+  ];
+
+  const modelArchItems = [
+    'YAMNet Embedding (1024-dim) + Acoustic Features (37-dim)',
+    'Dense Layer 256 (ReLU + L2 + BatchNorm + Dropout 0.5)',
+    'Dense Layer 128 (ReLU + L2 + BatchNorm + Dropout 0.4)',
+    'Dense Layer 64 (ReLU + L2 + BatchNorm + Dropout 0.3)',
+    'Output Softmax (3 classes: low, medium, high)',
+  ];
+
+  const audioFeatureItems = [
+    'RMS Energy (Mean, Std, Max)',
+    'Fundamental Frequency F0 (Mean, Std, Range)',
+    'Zero Crossing Rate & Spectral Centroid',
+    '13 MFCC Coefficients + Mel Spectrogram Stats',
+    'Tempo, Silence Ratio, and Jitter',
+  ];
+
   return (
     <div className="pt-24 pb-12 px-4 max-w-4xl mx-auto">
       <motion.div
@@ -34,9 +60,9 @@ const AboutPage = () => {
           <img src={LOGO_URL} alt="Explainable AI Logo" className="w-full h-full object-cover" />
         </div>
         <h1 className="font-space text-4xl md:text-5xl font-bold mb-4 gradient-text-purple text-glow">
-          About the System
+          {t('about_title')}
         </h1>
-        <p className="text-white/40">Explainable AI for Emotional Fatigue Classification</p>
+        <p className="text-white/40">{t('about_subtitle')}</p>
       </motion.div>
 
       <GlassCard className="mb-8">
@@ -45,36 +71,22 @@ const AboutPage = () => {
             <BookOpen className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="font-space text-2xl font-semibold">System Information</h2>
-            <p className="text-white/40 text-sm">Technical details about the classification system</p>
+            <h2 className="font-space text-2xl font-semibold">{t('system_info')}</h2>
+            <p className="text-white/40 text-sm">{t('system_info_desc')}</p>
           </div>
         </div>
 
         <div className="space-y-4 text-white/60 leading-relaxed">
           <p>
-            <strong className="text-white">Explainable AI Emotional Fatigue Detection System</strong> is a Deep Learning-based 
-            classification system developed to analyze human emotional fatigue levels through audio signals. 
-            The system uses a <strong className="text-primary-light">CNN architecture with Transfer Learning (YAMNet)</strong> 
-            {' '}capable of classifying into 3 fatigue categories.
+            <strong className="text-white">{t('about_system_name')}</strong> {t('about_system_desc')}
           </p>
-          
+
           <p>
-            The model is trained using audio features such as <strong className="text-secondary-light">MFCC</strong>, 
-            <strong className="text-secondary-light"> Mel Spectrogram</strong>, 
-            <strong className="text-secondary-light"> Spectral Centroid</strong>, 
-            <strong className="text-secondary-light"> RMS Energy</strong>, and 
-            <strong className="text-secondary-light"> Zero Crossing Rate</strong>. 
-            With the XAI approach, the system provides transparency in decision-making through 
-            important feature visualizations.
+            {t('about_model_desc')}
           </p>
 
           <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-glass-border">
-            {[
-              { icon: <Server className="w-4 h-4" />, label: 'Backend', value: 'Flask + Hugging Face Spaces', color: 'text-primary-light' },
-              { icon: <Code className="w-4 h-4" />, label: 'Framework', value: 'TensorFlow/Keras', color: 'text-secondary-light' },
-              { icon: <Layers className="w-4 h-4" />, label: 'Model', value: 'YAMNet + MLP', color: 'text-accent' },
-              { icon: <Brain className="w-4 h-4" />, label: 'Frontend', value: 'React.js + Tailwind CSS', color: 'text-accent-2' },
-            ].map((item) => (
+            {techStack.map((item) => (
               <div key={item.label} className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-white/5 border border-white/5">
                 <span className={item.color}>{item.icon}</span>
                 <strong className="text-white/70">{item.label}:</strong>
@@ -89,16 +101,10 @@ const AboutPage = () => {
         <GlassCard>
           <h3 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary-light" />
-            Model Architecture
+            {t('model_arch')}
           </h3>
           <ul className="space-y-3 text-sm text-white/60">
-            {[
-              'YAMNet Embedding (1024-dim) + Acoustic Features (37-dim)',
-              'Dense Layer 256 (ReLU + L2 + BatchNorm + Dropout 0.5)',
-              'Dense Layer 128 (ReLU + L2 + BatchNorm + Dropout 0.4)',
-              'Dense Layer 64 (ReLU + L2 + BatchNorm + Dropout 0.3)',
-              'Output Softmax (3 classes: low, medium, high)',
-            ].map((item, i) => (
+            {modelArchItems.map((item, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0" />
                 {item}
@@ -110,16 +116,10 @@ const AboutPage = () => {
         <GlassCard>
           <h3 className="font-space text-xl font-semibold mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-secondary-light" />
-            Audio Features
+            {t('audio_features')}
           </h3>
           <ul className="space-y-3 text-sm text-white/60">
-            {[
-              'RMS Energy (Mean, Std, Max)',
-              'Fundamental Frequency F0 (Mean, Std, Range)',
-              'Zero Crossing Rate & Spectral Centroid',
-              '13 MFCC Coefficients + Mel Spectrogram Stats',
-              'Tempo, Silence Ratio, and Jitter',
-            ].map((item, i) => (
+            {audioFeatureItems.map((item, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="w-1.5 h-1.5 bg-secondary rounded-full mt-2 flex-shrink-0" />
                 {item}
@@ -137,8 +137,8 @@ const AboutPage = () => {
         className="mb-8"
       >
         <div className="text-center mb-8">
-          <h2 className="font-space text-3xl font-bold gradient-text-purple mb-2">Meet the Developers</h2>
-          <p className="text-white/40 text-sm">The team behind Explainable AI</p>
+          <h2 className="font-space text-3xl font-bold gradient-text-purple mb-2">{t('meet_devs')}</h2>
+          <p className="text-white/40 text-sm">{t('devs_subtitle')}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -152,7 +152,6 @@ const AboutPage = () => {
             >
               <GlassCard className="group hover:border-primary/40 transition-all duration-500">
                 <div className="flex flex-col items-center text-center">
-                  {/* Photo Placeholder */}
                   <div className="relative w-32 h-32 mb-5 rounded-2xl overflow-hidden ring-2 ring-primary/30 group-hover:ring-primary-light transition-all duration-500">
                     {dev.photo ? (
                       <img 
@@ -170,18 +169,15 @@ const AboutPage = () => {
                     </div>
                   </div>
 
-                  {/* Role Badge */}
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-xs text-primary-light font-medium mb-3">
                     <Code className="w-3 h-3" />
                     {dev.role}
                   </span>
 
-                  {/* Name */}
                   <h3 className="font-space text-xl font-bold text-white mb-1 group-hover:text-primary-light transition-colors">
                     {dev.name}
                   </h3>
 
-                  {/* Info */}
                   <div className="space-y-1.5 mt-3">
                     <div className="flex items-center justify-center gap-2 text-sm text-white/50">
                       <GraduationCap className="w-4 h-4 text-secondary-light" />
@@ -215,12 +211,12 @@ const AboutPage = () => {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
               <Github className="w-8 h-8 text-white" />
             </div>
-            
+
             <h3 className="font-space text-2xl font-bold mb-2 gradient-text-purple">
-              Source Code
+              {t('source_code')}
             </h3>
             <p className="text-white/40 text-sm mb-6 max-w-md mx-auto">
-              Explore the full source code of this project on GitHub. Feel free to contribute or fork the repository.
+              {t('source_desc')}
             </p>
 
             <a
@@ -230,7 +226,7 @@ const AboutPage = () => {
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/40 group"
             >
               <Github className="w-5 h-5" />
-              View on GitHub
+              {t('view_github')}
               <ExternalLink className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
             </a>
 

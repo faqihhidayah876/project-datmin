@@ -2,16 +2,19 @@ import { Link, useLocation } from 'react-router-dom';
 import { Brain, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useApp } from '../../context/AppContext';
+import ThemeLanguageToggle from './ThemeLanguageToggle';
 import { LOGO_URL } from '../../utils/constants';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { t } = useApp();
 
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/predict', label: 'Classification' },
-    { path: '/about', label: 'About' },
+    { path: '/', label: t('nav_home') },
+    { path: '/predict', label: t('nav_classification') },
+    { path: '/about', label: t('nav_about') },
   ];
 
   return (
@@ -35,15 +38,16 @@ const Navbar = () => {
           <span className="gradient-text-purple text-glow">Explainable AI</span>
         </Link>
 
-        {/* Status Indicator */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs text-primary-light font-medium">
-            HF Connected
-          </span>
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-xs text-primary-light font-medium">
+              HF Connected
+            </span>
+          </div>
+          <ThemeLanguageToggle />
         </div>
 
-        {/* Desktop Nav */}
         <ul className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <li key={link.path}>
@@ -64,16 +68,17 @@ const Navbar = () => {
           ))}
         </ul>
 
-        {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors" 
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="md:hidden flex items-center gap-2">
+          <ThemeLanguageToggle />
+          <button 
+            className="p-2 rounded-lg hover:bg-white/5 transition-colors" 
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Nav */}
       {isOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-bg-dark/95 backdrop-blur-2xl border-b border-glass-border p-4">
           <ul className="flex flex-col gap-2">

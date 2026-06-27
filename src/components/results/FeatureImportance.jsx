@@ -1,16 +1,17 @@
 import { motion } from 'framer-motion';
-
-const features = [
-  { key: 'rms', label: 'RMS Energy', gradient: 'from-primary to-primary-light' },
-  { key: 'pitch', label: 'Pitch (F0)', gradient: 'from-secondary to-cyan-400' },
-  { key: 'centroid', label: 'Spectral Centroid', gradient: 'from-accent to-orange-400' },
-  { key: 'zcr', label: 'Zero Crossing', gradient: 'from-accent-2 to-accent' },
-  { key: 'silence', label: 'Silence Ratio', gradient: 'from-primary to-secondary' },
-];
+import { useApp } from '../../context/AppContext';
 
 const FeatureImportance = ({ featureValues }) => {
-  // ✅ SAFEGUARD
+  const { t } = useApp();
   const safeValues = featureValues || {};
+
+  const features = [
+    { key: 'rms', label: t('feature_rms'), gradient: 'from-primary to-primary-light' },
+    { key: 'pitch', label: t('feature_pitch'), gradient: 'from-secondary to-cyan-400' },
+    { key: 'centroid', label: t('feature_centroid'), gradient: 'from-accent to-orange-400' },
+    { key: 'zcr', label: t('feature_zcr'), gradient: 'from-accent-2 to-accent' },
+    { key: 'silence', label: t('feature_silence'), gradient: 'from-primary to-secondary' },
+  ];
 
   return (
     <div className="space-y-3 mt-4">

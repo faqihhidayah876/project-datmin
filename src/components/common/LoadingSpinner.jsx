@@ -1,12 +1,17 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useApp } from '../../context/AppContext';
 
 const LoadingSpinner = ({ 
   text = 'Analyzing Audio...', 
   subtext = 'Processing audio features and generating prediction',
   progress = null,
 }) => {
+  const { t } = useApp();
   const [dots, setDots] = useState('');
+
+  const displayText = text || t('loading_title');
+  const displaySubtext = subtext || t('loading_subtitle');
 
   // Animated dots
   useEffect(() => {
@@ -31,11 +36,11 @@ const LoadingSpinner = ({
   const progressStage = progress?.type || 'connecting';
 
   const stages = [
-    { id: 'connecting', label: 'Connecting to server' },
-    { id: 'upload', label: 'Uploading audio file' },
-    { id: 'processing', label: 'Processing audio features' },
-    { id: 'predicting', label: 'Running CNN prediction' },
-    { id: 'finalizing', label: 'Generating visualization' },
+    { id: 'connecting', label: t('stage_connecting') },
+    { id: 'upload', label: t('stage_upload') },
+    { id: 'processing', label: t('stage_processing') },
+    { id: 'predicting', label: t('stage_predicting') },
+    { id: 'finalizing', label: t('stage_finalizing') },
   ];
 
   const getCurrentStageIndex = () => {

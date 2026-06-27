@@ -2,9 +2,11 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Square, Play, Pause, RotateCcw, Save, Volume2, Activity, Timer, AlertCircle } from 'lucide-react';
 import RecordRTC from 'recordrtc';
+import { useApp } from '../../context/AppContext';
 import { MAX_AUDIO_DURATION } from '../../utils/constants';
 
 const VoiceRecorder = ({ onRecordingComplete }) => {
+  const { t } = useApp();
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -13,21 +15,17 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
   const [volume, setVolume] = useState(0);
   const [permissionStatus, setPermissionStatus] = useState('prompt');
 
-  // ✅ RecordRTC refs
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
-  
-  // Visualizer refs
   const timerRef = useRef(null);
   const animationRef = useRef(null);
   const canvasRef = useRef(null);
 
   const maxDuration = MAX_AUDIO_DURATION;
 
-  // Check microphone permission
   useEffect(() => {
     const checkPermission = async () => {
       try {
@@ -43,7 +41,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     checkPermission();
   }, []);
 
-  // Timer
   useEffect(() => {
     if (isRecording && !isPaused) {
       timerRef.current = setInterval(() => {
@@ -63,7 +60,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     };
   }, [isRecording, isPaused, maxDuration]);
 
-  // Visualize volume (pakai Web Audio API terpisah untuk visualizer saja)
   const visualizeVolume = useCallback(() => {
     const analyser = analyserRef.current;
     const canvas = canvasRef.current;
@@ -107,22 +103,19 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     draw();
   }, [isRecording]);
 
-  // ✅ START RECORDING dengan RecordRTC (WAV murni)
   const startRecording = async () => {
     try {
-      // 1. Minta stream dengan SEMUA filter dimatikan (raw audio)
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: false,      // ❌ Matikan
-          autoGainControl: false,       // ❌ Matikan (sangat penting!)
-          noiseSuppression: false,      // ❌ Matikan (sangat penting!)
+          echoCancellation: false,
+          autoGainControl: false,
+          noiseSuppression: false,
           channelCount: 1,
-          sampleRate: 16000             // ✅ Samakan dengan backend Librosa
+          sampleRate: 16000
         }
       });
       streamRef.current = stream;
 
-      // 2. Setup visualizer (stream terpisah untuk UI)
       try {
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         audioContextRef.current = audioContext;
@@ -130,19 +123,17 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
         source.connect(analyser);
-        // Jangan connect ke destination! (biar tidak feedback/echo)
         analyserRef.current = analyser;
       } catch (vizErr) {
         console.warn('Visualizer setup failed:', vizErr);
       }
 
-      // 3. ✅ Buat RecordRTC dengan StereoAudioRecorder untuk WAV murni
       const recorder = new RecordRTC(stream, {
         type: 'audio',
         mimeType: 'audio/wav',
-        recorderType: RecordRTC.StereoAudioRecorder, // 🔑 Kunci: paksa WAV PCM
-        numberOfAudioChannels: 1,      // Mono
-        desiredSampRate: 16000,        // Samakan backend
+        recorderType: RecordRTC.StereoAudioRecorder,
+        numberOfAudioChannels: 1,
+        desiredSampRate: 16000,
         disableLogs: true
       });
 
@@ -164,22 +155,17 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     }
   };
 
-  // ✅ STOP RECORDING
   const stopRecording = () => {
     if (!recorderRef.current || !isRecording) return;
 
     recorderRef.current.stopRecording(() => {
-      // Ambil blob WAV murni
       const blob = recorderRef.current.getBlob();
-      
-      // Pastikan type benar
       const wavBlob = new Blob([blob], { type: 'audio/wav' });
       const url = URL.createObjectURL(wavBlob);
       
       setAudioBlob(wavBlob);
       setAudioUrl(url);
 
-      // Buat File object untuk dikirim ke backend
       const file = new File([wavBlob], `recording-${Date.now()}.wav`, {
         type: 'audio/wav',
       });
@@ -188,12 +174,10 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         onRecordingComplete(file, url);
       }
 
-      // Cleanup
       cleanup();
     });
   };
 
-  // ✅ PAUSE / RESUME
   const togglePause = () => {
     if (!recorderRef.current) return;
     
@@ -206,7 +190,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     }
   };
 
-  // ✅ RESET
   const resetRecording = () => {
     cleanup();
     setAudioBlob(null);
@@ -215,37 +198,31 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     setVolume(0);
   };
 
-  // Cleanup function
   const cleanup = () => {
     setIsRecording(false);
     setIsPaused(false);
 
-    // Stop RecordRTC
     if (recorderRef.current) {
       recorderRef.current.destroy();
       recorderRef.current = null;
     }
 
-    // Stop stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
 
-    // Stop audio context
     if (audioContextRef.current) {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
 
-    // Stop animation
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
       animationRef.current = null;
     }
   };
 
-  // Format time
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -258,7 +235,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
     return 'bg-accent';
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       cleanup();
@@ -268,7 +244,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
 
   return (
     <div className="space-y-6">
-      {/* Permission Warning */}
       {permissionStatus === 'denied' && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -287,7 +262,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         </motion.div>
       )}
 
-      {/* Recording Visualizer */}
       <div className="relative rounded-2xl overflow-hidden bg-black/40 border border-glass-border">
         <canvas
           ref={canvasRef}
@@ -324,7 +298,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         )}
       </div>
 
-      {/* Timer */}
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-3 px-6 py-3 bg-black/20 rounded-xl border border-glass-border">
           <Timer className="w-5 h-5 text-white/50" />
@@ -337,7 +310,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         </div>
       </div>
 
-      {/* Controls */}
       <div className="flex items-center justify-center gap-4">
         {!isRecording ? (
           <motion.button
@@ -375,7 +347,6 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         )}
       </div>
 
-      {/* Playback & Actions */}
       <AnimatePresence>
         {audioUrl && !isRecording && (
           <motion.div
@@ -420,15 +391,14 @@ const VoiceRecorder = ({ onRecordingComplete }) => {
         )}
       </AnimatePresence>
 
-      {/* Tips */}
       <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
-        <h4 className="text-sm font-medium text-primary-light mb-2">💡 Recording Tips</h4>
+        <h4 className="text-sm font-medium text-primary-light mb-2">💡 {t('recording_tips')}</h4>
         <ul className="text-xs text-white/50 space-y-1">
-          <li>• Speak clearly and at a normal pace</li>
-          <li>• Minimize background noise</li>
-          <li>• Keep microphone 10-15 cm from your mouth</li>
-          <li>• Maximum recording duration: <span className="text-accent-2 font-medium">{maxDuration} seconds</span></li>
-          <li>• Audio saved as <span className="text-green-400 font-medium">16kHz WAV (PCM)</span> for best model accuracy</li>
+          <li>• {t('tip_speak_clearly')}</li>
+          <li>• {t('tip_minimize_noise')}</li>
+          <li>• {t('tip_distance')}</li>
+          <li>• {t('tip_max_duration')}: <span className="text-accent-2 font-medium">{maxDuration} {t('time') === 'Time' ? 'seconds' : 'detik'}</span></li>
+          <li>• {t('tip_format')}</li>
         </ul>
       </div>
     </div>

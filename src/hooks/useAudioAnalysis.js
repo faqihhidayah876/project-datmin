@@ -1,11 +1,34 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useApi } from './useApi';
 import { CLASS_LABELS, getGaugeScore, FEATURE_IMPORTANCE_MAP } from '../utils/constants';
 
 export const useAudioAnalysis = () => {
   const [results, setResults] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState(() => {
+    // Load history from localStorage on init
+    const stored = localStorage.getItem('analysis_history');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        // Convert string timestamps back to Date objects
+        return parsed.map(item => ({
+          ...item,
+          timestamp: new Date(item.timestamp)
+        }));
+      } catch (e) {
+        console.error('Error parsing history:', e);
+        return [];
+      }
+    }
+    return [];
+  });
+  
   const { loading, error, connected, progress, predict, checkApiConnection } = useApi();
+
+  // Save history to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('analysis_history', JSON.stringify(history));
+  }, [history]);
 
   const analyzeAudio = useCallback(async (audioFile) => {
     console.log('=== ANALYZE AUDIO START ===');
@@ -15,27 +38,22 @@ export const useAudioAnalysis = () => {
       const data = await predict(audioFile);
       console.log('Raw API data:', data);
 
-      // ✅ VALIDASI RESPONSE API
       if (!data) {
         throw new Error('Empty response from API');
       }
 
-      // Handle berbagai format response
       const predictedClass = data.predicted_class || data.predictedClass || 'medium';
       const confidence = typeof data.confidence === 'number' ? data.confidence : 0;
       
-      // Normalisasi probabilities - bisa array atau object
       let probabilities = [];
       if (Array.isArray(data.probabilities)) {
         probabilities = data.probabilities;
       } else if (typeof data.probabilities === 'object' && data.probabilities !== null) {
-        // Jika object {low: 0.1, medium: 0.7, high: 0.2}
         probabilities = Object.entries(data.probabilities).map(([cls, prob]) => ({
           class: cls,
           probability: typeof prob === 'number' ? prob * 100 : 0
         }));
       } else {
-        // Fallback jika tidak ada probabilities
         probabilities = [
           { class: 'low', probability: predictedClass === 'low' ? confidence : (100 - confidence) / 2 },
           { class: 'medium', probability: predictedClass === 'medium' ? confidence : (100 - confidence) / 2 },
@@ -43,7 +61,6 @@ export const useAudioAnalysis = () => {
         ];
       }
 
-      // Pastikan semua class ada
       const probMap = {};
       probabilities.forEach(p => { probMap[p.class] = p.probability; });
       
@@ -68,7 +85,7 @@ export const useAudioAnalysis = () => {
 
       const historyItem = {
         id: Date.now(),
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(), // Store as ISO string for JSON serialization
         fileName: audioFile.name,
         predictedClass,
         confidence,
@@ -92,6 +109,7 @@ export const useAudioAnalysis = () => {
 
   const clearHistory = useCallback(() => {
     setHistory([]);
+    localStorage.removeItem('analysis_history');
   }, []);
 
   return {
