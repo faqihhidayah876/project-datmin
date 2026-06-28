@@ -16,7 +16,8 @@ import {
   TrendingUp,
   BarChart3,
   PieChart,
-  Clock
+  Clock,
+  Zap
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -235,6 +236,39 @@ const HomePage = () => {
           <Link to="/about" className="px-8 py-4 rounded-2xl border border-glass-border text-white/70 hover:text-white hover:border-primary-light/50 transition-all duration-300">
             {t('btn_learn_more')}
           </Link>
+        </motion.div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="max-w-4xl mx-auto px-6 pt-8 pb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="flex flex-wrap justify-center gap-6"
+        >
+          {[
+            { value: '73.85%', label: t('stat_accuracy'), color: 'text-secondary', icon: <Zap className="w-4 h-4" /> },
+            { value: '3', label: t('stat_classes'), color: 'text-accent-2', icon: <Layers className="w-4 h-4" /> },
+            { value: 'CNN', label: t('stat_dl'), color: 'text-primary-light', icon: <Brain className="w-4 h-4" /> },
+          ].map((stat, i) => (
+            <motion.div 
+              key={stat.label} 
+              className="text-center px-8 py-5 rounded-2xl bg-glass border border-glass-border hover:border-primary/30 transition-all duration-500"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + i * 0.1 }}
+              whileHover={{ scale: 1.05, y: -5 }}
+            >
+              <div className={`inline-flex items-center gap-2 text-sm ${stat.color} mb-1`}>
+                {stat.icon}
+                <span>{stat.label}</span>
+              </div>
+              <div className={`font-space text-3xl md:text-4xl font-bold ${stat.color}`}>
+                {stat.value}
+              </div>
+            </motion.div>
+          ))}
         </motion.div>
       </section>
 

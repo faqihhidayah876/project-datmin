@@ -167,6 +167,9 @@ const translations = {
     shap_explanation: 'SHAP values show how each feature pushes the prediction away from the base value. Longer bars indicate stronger influence on the final decision.',
     // ===== HOMEPAGE & DASHBOARD NEW KEYS =====
     badge_cnn: 'CNN-based Emotional Fatigue Classification System',
+    stat_accuracy: 'Model Accuracy',
+    stat_classes: 'Fatigue Classes',
+    stat_dl: 'Deep Learning',
     stat_overview: 'Statistic Overview',
     stat_realtime: 'Real-time statistic and prediction summary',
     sys_flow: 'System Architecture Flow',
@@ -378,6 +381,9 @@ const translations = {
     shap_explanation: 'Nilai SHAP menunjukkan bagaimana setiap fitur mendorong prediksi menjauh dari nilai dasar. Batang yang lebih panjang menunjukkan pengaruh yang lebih kuat pada keputusan akhir.',
     // ===== HOMEPAGE & DASHBOARD NEW KEYS =====
     badge_cnn: 'Sistem Klasifikasi Kelelahan Emosional Berbasis CNN',
+    stat_accuracy: 'Akurasi Model',
+    stat_classes: 'Kelas Kelelahan',
+    stat_dl: 'Deep Learning',
     stat_overview: 'Ikhtisar Statistik',
     stat_realtime: 'Ringkasan statistik dan prediksi real-time',
     sys_flow: 'Alur Arsitektur Sistem',
