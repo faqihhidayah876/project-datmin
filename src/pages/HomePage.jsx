@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  Activity, 
-  Layers, 
-  Brain, 
-  ArrowRight, 
+import {
+  Activity,
+  Layers,
+  Brain,
+  ArrowRight,
   Shield,
   LayoutDashboard,
   Database,
@@ -19,13 +19,13 @@ import {
   Clock,
   Zap
 } from 'lucide-react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart as RePieChart,
   Pie,
@@ -35,6 +35,7 @@ import {
   Legend
 } from 'recharts';
 import GlassCard from '../components/common/GlassCard';
+import FatigueEducation from '../components/common/FatigueEducation';
 import { LOGO_URL } from '../utils/constants';
 import { useAudioAnalysis } from '../hooks/useAudioAnalysis';
 import { useApp } from '../context/AppContext';
@@ -56,7 +57,6 @@ const HomePage = () => {
       const medium = history.filter(h => h.predictedClass === 'medium').length;
       const high = history.filter(h => h.predictedClass === 'high').length;
       const avgConf = history.reduce((sum, h) => sum + h.confidence, 0) / history.length;
-
       setStats({
         totalAnalyzed: history.length,
         lowCount: low,
@@ -85,7 +85,7 @@ const HomePage = () => {
     },
   ];
 
-  const trendData = history.length > 0 
+  const trendData = history.length > 0
     ? history.slice(0, 10).map((h, i) => ({
         name: `#${i + 1}`,
         confidence: h.confidence,
@@ -184,7 +184,6 @@ const HomePage = () => {
       <section className="text-center py-20 px-4 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-20 right-20 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] pointer-events-none" />
-
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -195,7 +194,6 @@ const HomePage = () => {
             <img src={LOGO_URL} alt="Explainable AI Logo" className="w-full h-full object-cover" />
           </div>
         </motion.div>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -203,7 +201,6 @@ const HomePage = () => {
         >
           {t('badge_cnn')}
         </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -214,7 +211,6 @@ const HomePage = () => {
           <br />
           <span className="text-white/90">{t('hero_subtitle')}</span>
         </motion.h1>
-
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -223,7 +219,6 @@ const HomePage = () => {
         >
           {t('hero_desc')}
         </motion.p>
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -252,8 +247,8 @@ const HomePage = () => {
             { value: '3', label: t('stat_classes'), color: 'text-accent-2', icon: <Layers className="w-4 h-4" /> },
             { value: 'CNN', label: t('stat_dl'), color: 'text-primary-light', icon: <Brain className="w-4 h-4" /> },
           ].map((stat, i) => (
-            <motion.div 
-              key={stat.label} 
+            <motion.div
+              key={stat.label}
               className="text-center px-8 py-5 rounded-2xl bg-glass border border-glass-border hover:border-primary/30 transition-all duration-500"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -283,7 +278,6 @@ const HomePage = () => {
           <h2 className="font-space text-3xl md:text-4xl font-bold mb-4 gradient-text-purple">{t('features_title')}</h2>
           <p className="text-white/40 max-w-lg mx-auto">{t('feature_xai_desc')}</p>
         </motion.div>
-
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature, i) => (
             <motion.div
@@ -297,7 +291,6 @@ const HomePage = () => {
                 <div className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-500">
                   {feature.icon}
                 </div>
-
                 <h3 className="font-space text-xl font-semibold mb-3 group-hover:text-primary-light transition-colors">
                   {feature.title}
                 </h3>
@@ -309,6 +302,9 @@ const HomePage = () => {
           ))}
         </div>
       </section>
+
+      {/* ===== FATIGUE EDUCATION SECTION ===== */}
+      <FatigueEducation />
 
       {/* DASHBOARD STATS */}
       <section className="max-w-6xl mx-auto px-6 py-16">
@@ -324,33 +320,32 @@ const HomePage = () => {
           </h2>
           <p className="text-white/40 text-sm">{t('stat_realtime')}</p>
         </motion.div>
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { 
-              label: t('stat_total'), 
-              value: stats.totalAnalyzed, 
+            {
+              label: t('stat_total'),
+              value: stats.totalAnalyzed,
               icon: <FileAudio className="w-5 h-5" />,
               color: 'text-primary-light',
               bg: 'bg-primary/10',
             },
-            { 
-              label: t('stat_avg_conf'), 
-              value: `${stats.avgConfidence.toFixed(1)}%`, 
+            {
+              label: t('stat_avg_conf'),
+              value: `${stats.avgConfidence.toFixed(1)}%`,
               icon: <Activity className="w-5 h-5" />,
               color: 'text-secondary-light',
               bg: 'bg-secondary/10',
             },
-            { 
-              label: t('stat_low'), 
-              value: stats.lowCount, 
+            {
+              label: t('stat_low'),
+              value: stats.lowCount,
               icon: <TrendingUp className="w-5 h-5" />,
               color: 'text-green-400',
               bg: 'bg-green-500/10',
             },
-            { 
-              label: t('stat_high'), 
-              value: stats.highCount, 
+            {
+              label: t('stat_high'),
+              value: stats.highCount,
               icon: <TrendingUp className="w-5 h-5 rotate-180" />,
               color: 'text-accent',
               bg: 'bg-accent/10',
@@ -375,7 +370,6 @@ const HomePage = () => {
             </motion.div>
           ))}
         </div>
-
         <div className="grid md:grid-cols-2 gap-6">
           <GlassCard>
             <h3 className="font-space text-lg font-semibold mb-4 text-white/80">{t('confidence_trend')}</h3>
@@ -385,18 +379,18 @@ const HomePage = () => {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} />
                   <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1a1a2e', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#1a1a2e',
                       border: '1px solid rgba(124,58,237,0.3)',
                       borderRadius: '12px',
                       color: '#fff'
                     }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="confidence" 
-                    stroke="#8B5CF6" 
+                  <Line
+                    type="monotone"
+                    dataKey="confidence"
+                    stroke="#8B5CF6"
                     strokeWidth={2}
                     dot={{ fill: '#8B5CF6', r: 4 }}
                     activeDot={{ r: 6, fill: '#A78BFA' }}
@@ -405,7 +399,6 @@ const HomePage = () => {
               </ResponsiveContainer>
             </div>
           </GlassCard>
-
           <GlassCard>
             <h3 className="font-space text-lg font-semibold mb-4 text-white/80">{t('class_distribution')}</h3>
             <div className="h-64">
@@ -424,16 +417,16 @@ const HomePage = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1a1a2e', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#1a1a2e',
                       border: '1px solid rgba(124,58,237,0.3)',
                       borderRadius: '12px',
                       color: '#fff'
                     }}
                   />
-                  <Legend 
-                    verticalAlign="bottom" 
+                  <Legend
+                    verticalAlign="bottom"
                     height={36}
                     iconType="circle"
                     formatter={(value) => <span className="text-white/60 text-xs">{value}</span>}
@@ -443,7 +436,6 @@ const HomePage = () => {
             </div>
           </GlassCard>
         </div>
-
         <GlassCard className="mt-6">
           <h3 className="font-space text-lg font-semibold mb-4 text-white/80">{t('pred_count')}</h3>
           <div className="h-48">
@@ -452,9 +444,9 @@ const HomePage = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} />
                 <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1a1a2e', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#1a1a2e',
                     border: '1px solid rgba(124,58,237,0.3)',
                     borderRadius: '12px',
                     color: '#fff'
@@ -485,10 +477,8 @@ const HomePage = () => {
           </h2>
           <p className="text-white/40 text-sm">{t('sys_flow_sub')}</p>
         </motion.div>
-
         <div className="relative">
           <div className="hidden lg:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-secondary to-accent z-0" />
-
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 relative z-10">
             {flowchartSteps.map((step, i) => (
               <motion.div
@@ -499,23 +489,20 @@ const HomePage = () => {
                 transition={{ delay: i * 0.15 }}
               >
                 <GlassCard className="h-full group hover:border-primary/40 transition-all duration-500 relative">
-                  <div 
+                  <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white mb-3"
                     style={{ backgroundColor: step.color }}
                   >
                     {step.id}
                   </div>
-
-                  <div 
+                  <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
                     style={{ backgroundColor: `${step.color}30` }}
                   >
                     <span style={{ color: step.color }}>{step.icon}</span>
                   </div>
-
                   <h3 className="font-space text-sm font-bold text-white mb-1">{step.title}</h3>
                   <p className="text-xs text-white/40 mb-3">{step.subtitle}</p>
-
                   <ul className="space-y-1.5">
                     {step.details.map((detail, j) => (
                       <li key={j} className="text-xs text-white/50 flex items-start gap-1.5">
@@ -540,7 +527,6 @@ const HomePage = () => {
           className="relative p-12 rounded-3xl bg-gradient-to-br from-primary/20 via-secondary/10 to-transparent border border-primary/20 overflow-hidden"
         >
           <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%237C3AED%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50" />
-
           <div className="relative z-10 text-center">
             <Shield className="w-12 h-12 text-primary-light mx-auto mb-4" />
             <h2 className="font-space text-3xl font-bold mb-4">{t('cta_ready')}</h2>

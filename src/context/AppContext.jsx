@@ -126,7 +126,6 @@ const translations = {
     btn_download_pdf: 'Download PDF Report',
     footer_desc: 'Emotional Fatigue Classification System',
     footer_rights: 'All rights reserved.',
-    // ===== ABOUT PAGE KEYS =====
     about_system_name: 'Explainable AI Emotional Fatigue Detection System',
     about_system_desc: 'is a Deep Learning-based classification system developed to analyze human emotional fatigue levels through audio signals. The system uses a CNN architecture with Transfer Learning (YAMNet) capable of classifying into 3 fatigue categories.',
     about_model_desc: 'The model is trained using audio features such as MFCC, Mel Spectrogram, Spectral Centroid, RMS Energy, and Zero Crossing Rate. With the XAI approach, the system provides transparency in decision-making through important feature visualizations.',
@@ -165,7 +164,6 @@ const translations = {
     prediction: 'prediction',
     lime_explanation: 'LIME highlights which audio features most influenced the model\'s decision for this specific sample. Green bars support the predicted class, red bars oppose it.',
     shap_explanation: 'SHAP values show how each feature pushes the prediction away from the base value. Longer bars indicate stronger influence on the final decision.',
-    // ===== HOMEPAGE & DASHBOARD NEW KEYS =====
     badge_cnn: 'CNN-based Emotional Fatigue Classification System',
     stat_accuracy: 'Model Accuracy',
     stat_classes: 'Fatigue Classes',
@@ -214,6 +212,25 @@ const translations = {
     ready_classify: 'Ready to Classify?',
     ready_classify_desc: 'Upload audio or record your voice for instant fatigue analysis.',
     start_classify: 'Start Classification',
+
+    // ===== FATIGUE EDUCATION KEYS =====
+    fatigue_edu_title: 'Fatigue Level Classification',
+    fatigue_edu_subtitle: 'Understand the audio characteristics and indicators of each fatigue level to better interpret classification results.',
+    level_low: 'LEVEL 01 - LOW FATIGUE',
+    level_medium: 'LEVEL 02 - MEDIUM FATIGUE',
+    level_high: 'LEVEL 03 - HIGH FATIGUE',
+    low_edu_title: 'LOW FATIGUE (Energetic)',
+    medium_edu_title: 'MEDIUM FATIGUE (Moderate)',
+    high_edu_title: 'HIGH FATIGUE (Exhausted)',
+    low_edu_desc: 'Voice is clear, energetic, and well-articulated. Pitch variation is high, tempo is fast, and RMS energy is strong. The speaker shows enthusiasm and alertness. Minimal silence ratio indicates active engagement.',
+    medium_edu_desc: 'Voice begins to show signs of tiredness. Pitch variation decreases, tempo slows down, and energy drops moderately. Occasional pauses and reduced articulation clarity. The speaker may sound less enthusiastic.',
+    high_edu_desc: 'Voice is monotonous, low-pitched, and lacks energy. High silence ratio, slow tempo, and reduced RMS energy. Speech may be slurred or hesitant. Strong indicators of exhaustion and mental fatigue.',
+    low_audio_features: 'High RMS Energy • Varied Pitch • Fast Tempo • Low Silence Ratio',
+    medium_audio_features: 'Moderate RMS • Reduced Pitch Range • Slower Tempo • Medium Silence',
+    high_audio_features: 'Low RMS Energy • Flat Pitch • Very Slow Tempo • High Silence Ratio',
+    low_recommendation: 'Keep maintaining your healthy habits and energy levels!',
+    medium_recommendation: 'Consider taking a short break and resting your voice.',
+    high_recommendation: 'Immediate rest is recommended. Avoid strenuous activities.',
   },
   id: {
     nav_home: 'Beranda',
@@ -340,7 +357,6 @@ const translations = {
     btn_download_pdf: 'Unduh Laporan PDF',
     footer_desc: 'Sistem Klasifikasi Kelelahan Emosional',
     footer_rights: 'Hak cipta dilindungi.',
-    // ===== ABOUT PAGE KEYS =====
     about_system_name: 'Sistem Deteksi Kelelahan Emosional Explainable AI',
     about_system_desc: 'adalah sistem klasifikasi berbasis Deep Learning yang dikembangkan untuk menganalisis tingkat kelelahan emosional manusia melalui sinyal audio. Sistem menggunakan arsitektur CNN dengan Transfer Learning (YAMNet) yang mampu mengklasifikasikan ke dalam 3 kategori kelelahan.',
     about_model_desc: 'Model dilatih menggunakan fitur audio seperti MFCC, Mel Spektrogram, Sentroid Spektral, Energi RMS, dan Zero Crossing Rate. Dengan pendekatan XAI, sistem memberikan transparansi dalam pengambilan keputusan melalui visualisasi fitur penting.',
@@ -379,7 +395,6 @@ const translations = {
     prediction: 'prediksi',
     lime_explanation: 'LIME menyoroti fitur audio mana yang paling memengaruhi keputusan model untuk sampel spesifik ini. Batang hijau mendukung kelas yang diprediksi, batang merah menentangnya.',
     shap_explanation: 'Nilai SHAP menunjukkan bagaimana setiap fitur mendorong prediksi menjauh dari nilai dasar. Batang yang lebih panjang menunjukkan pengaruh yang lebih kuat pada keputusan akhir.',
-    // ===== HOMEPAGE & DASHBOARD NEW KEYS =====
     badge_cnn: 'Sistem Klasifikasi Kelelahan Emosional Berbasis CNN',
     stat_accuracy: 'Akurasi Model',
     stat_classes: 'Kelas Kelelahan',
@@ -428,7 +443,26 @@ const translations = {
     ready_classify: 'Siap Klasifikasi?',
     ready_classify_desc: 'Unggah audio atau rekam suara Anda untuk analisis kelelahan instan.',
     start_classify: 'Mulai Klasifikasi',
-  }
+
+    // ===== FATIGUE EDUCATION KEYS =====
+    fatigue_edu_title: 'Klasifikasi Tingkat Kelelahan',
+    fatigue_edu_subtitle: 'Pahami karakteristik audio dan indikator setiap tingkat kelelahan untuk lebih baik menginterpretasikan hasil klasifikasi.',
+    level_low: 'LEVEL 01 - KELELAHAN RENDAH',
+    level_medium: 'LEVEL 02 - KELELAHAN SEDANG',
+    level_high: 'LEVEL 03 - KELELAHAN TINGGI',
+    low_edu_title: 'KELELAHAN RENDAH (Semangat)',
+    medium_edu_title: 'KELELAHAN SEDANG (Cukup Lelah)',
+    high_edu_title: 'KELELAHAN TINGGI (Sangat Lelah)',
+    low_edu_desc: 'Suara jelas, berenergi, dan terartikulasi dengan baik. Variasi pitch tinggi, tempo cepat, dan energi RMS kuat. Pembicara menunjukkan antusiasme dan kewaspadaan. Rasio diam minimal menunjukkan keterlibatan aktif.',
+    medium_edu_desc: 'Suara mulai menunjukkan tanda-tanda kelelahan. Variasi pitch menurun, tempo melambat, dan energi turun sedang. Jeda sesekali dan kejelasan artikulasi berkurang. Pembicara terdengar kurang antusias.',
+    high_edu_desc: 'Suara monoton, pitch rendah, dan kurang energi. Rasio diam tinggi, tempo sangat lambat, dan energi RMS rendah. Ucapan mungkin tidak jelas atau ragu-ragu. Indikator kuat kelelahan fisik dan mental.',
+    low_audio_features: 'Energi RMS Tinggi • Pitch Bervariasi • Tempo Cepat • Rasio Diam Rendah',
+    medium_audio_features: 'RMS Sedang • Rentang Pitch Berkurang • Tempo Lebih Lambat • Diam Sedang',
+    high_audio_features: 'Energi RMS Rendah • Pitch Datar • Tempo Sangat Lambat • Rasio Diam Tinggi',
+    low_recommendation: 'Pertahankan kebiasaan sehat dan tingkat energi Anda!',
+    medium_recommendation: 'Pertimbangkan untuk istirahat sejenak dan mengistirahatkan suara.',
+    high_recommendation: 'Istirahat segera direkomendasikan. Hindari aktivitas berat.',
+  },
 };
 
 const AppContext = createContext();
@@ -437,7 +471,6 @@ export const AppProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('app_language') || 'en';
   });
-
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('app_theme') || 'dark';
   });
