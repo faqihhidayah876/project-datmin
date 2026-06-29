@@ -371,3 +371,51 @@
 .light-mode .text-red-400\/60 {
   color: rgba(220, 38, 38, 0.6);
 }
+
+/* ============================================
+   ADDITIONAL STYLES FOR NEW HOME COMPONENTS
+   ============================================ */
+
+/* Enhanced glow effects */
+.glow-intense {
+  box-shadow: 
+    0 0 20px rgba(124, 58, 237, 0.4),
+    0 0 40px rgba(124, 58, 237, 0.2),
+    0 0 60px rgba(124, 58, 237, 0.1);
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.5), 0 0 60px rgba(167, 139, 250, 0.2);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom selection color */
+::selection {
+  background: rgba(124, 58, 237, 0.3);
+  color: white;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
