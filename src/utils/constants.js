@@ -8,6 +8,11 @@ export const getBaseUrl = () => HF_SPACE_URL;
 export const getPredictUrl = () => `${HF_SPACE_URL}${HF_PREDICT_ENDPOINT}`;
 export const isConfigValid = () => true;
 
+// ==================== CEREBRAS AI CHAT API CONFIGURATION ====================
+export const CEREBRAS_API_KEY = import.meta.env.VITE_CEREBRAS_API_KEY || '';
+export const CEREBRAS_API_URL = import.meta.env.VITE_CEREBRAS_API_URL || 'https://api.cerebras.ai/v1/chat/completions';
+export const isAIConfigValid = () => !!CEREBRAS_API_KEY;
+
 // ==================== LOGO ====================
 export const LOGO_URL = 'https://i.ibb.co.com/Rpkm30y0/logo-datmin.png';
 

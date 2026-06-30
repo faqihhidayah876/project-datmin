@@ -18,7 +18,8 @@ import {
   Heart,
   BrainCircuit,
   Lightbulb,
-  GitCommit
+  GitCommit,
+  MessageCircle
 } from 'lucide-react';
 import { useAudioAnalysis } from '../hooks/useAudioAnalysis';
 import { useApp } from '../context/AppContext';
@@ -35,6 +36,7 @@ import FeatureImportance from '../components/results/FeatureImportance';
 import LimeExplanation from '../components/results/LimeExplanation';
 import ShapExplanation from '../components/results/ShapExplanation';
 import HealthRecommendations from '../components/results/HealthRecommendations';
+import AIChatAssistant from '../components/results/AIChatAssistant';
 import { LOGO_URL } from '../utils/constants';
 
 const SpectrogramDisplay = React.lazy(() => 
@@ -59,8 +61,11 @@ const PredictPage = () => {
   const [localError, setLocalError] = useState(null);
   const [xaiTab, setXaiTab] = useState('lime');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
-  const { t } = useApp();
+  // ✅ FIX: Destructure both `t` AND `language` from useApp()
+  const { t, language } = useApp();
+
   const { results, history, loading, error, connected, progress, analyzeAudio, checkApiConnection, clearHistory } = useAudioAnalysis();
 
   const displayError = localError || error;
@@ -82,6 +87,7 @@ const PredictPage = () => {
     if (audioUrl) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null);
     setLocalError(null);
+    setShowChat(false);
   }, [audioUrl]);
 
   const handleAnalyze = async () => {
@@ -90,6 +96,7 @@ const PredictPage = () => {
       return;
     }
     setLocalError(null);
+    setShowChat(false);
     try {
       await analyzeAudio(file);
     } catch (err) {
@@ -126,7 +133,7 @@ const PredictPage = () => {
   };
 
   return (
-    <div className="pt-24 pb-12 px-4 max-w-7xl mx-auto">
+    <div className="pt-24 pb-12 px-4 max-w-7xl mx-auto relative">
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -254,7 +261,7 @@ const PredictPage = () => {
         </GlassCard>
       </section>
 
-      {/* ===== HISTORY CARD - SELALU MUNCUL DI BAWAH UPLOAD ===== */}
+      {/* ===== HISTORY CARD ===== */}
       <section className="mb-8">
         <GlassCard>
           <div className="flex items-center justify-between mb-6">
@@ -499,6 +506,54 @@ const PredictPage = () => {
                 </div>
                 <HealthRecommendations predictedClass={results.predictedClass} />
               </GlassCard>
+
+                            {/* ===== AI CHAT ASSISTANT CARD ===== */}
+              <GlassCard className="md:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-white/10">
+                    <img 
+                      src="https://i.ibb.co.com/jZZ0648R/Logo-SAHAJA-AI.png" 
+                      alt="SAHAJA AI" 
+                      className="w-8 h-8 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <Sparkles className="w-5 h-5 text-white hidden" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">
+                      {language === 'id' ? 'Asisten Kesehatan Explainable AI' : 'Explainable AI Health Assistant'}
+                    </h3>
+                    <span className="text-xs text-white/40">
+                      {language === 'id' 
+                        ? 'Powered by SAHAJA AI'
+                        : 'Powered by SAHAJA AI'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 bg-primary/5 border border-primary/10 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-primary to-secondary flex-shrink-0">
+                      <MessageCircle className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-white/70 font-medium mb-1">
+                        {language === 'id' 
+                          ? 'Ingin berdiskusi lebih lanjut?'
+                          : 'Want to discuss further?'}
+                      </p>
+                      <p className="text-xs text-white/50 leading-relaxed">
+                        {language === 'id'
+                          ? 'Klik tombol chat di pojok kanan bawah layar untuk berdiskusi dengan asisten AI kami. Asisten ini dapat membantu menjelaskan hasil analisis, memberikan saran personal, dan menjawab pertanyaan tentang kesehatan mental & kelelahan berdasarkan kondisi Anda saat ini.'
+                          : 'Click the chat button at the bottom right corner of the screen to discuss with our AI assistant. It can help explain your analysis results, provide personalized advice, and answer questions about mental health & fatigue based on your current condition.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
             </div>
 
             <GlassCard className="mt-6">
@@ -514,6 +569,9 @@ const PredictPage = () => {
           </motion.section>
         )}
       </AnimatePresence>
+
+      {/* ===== FLOATING AI CHAT (Alternative: Always visible when results exist) ===== */}
+      {results && !showChat && <AIChatAssistant fatigueData={results} />}
     </div>
   );
 };
