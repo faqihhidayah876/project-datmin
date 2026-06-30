@@ -456,8 +456,8 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
 
               <p className="text-[10px] text-white/20 mt-2 text-center">
                 {language === 'id'
-                  ? 'Powered by Cerebras AI • Bukan pengganti saran medis profesional'
-                  : 'Powered by Cerebras AI • Not a substitute for professional medical advice'}
+                  ? 'Powered by SAHAJA AI • Bukan pengganti saran medis profesional'
+                  : 'Powered by SAHAJA AI • Not a substitute for professional medical advice'}
               </p>
             </div>
           </motion.div>
