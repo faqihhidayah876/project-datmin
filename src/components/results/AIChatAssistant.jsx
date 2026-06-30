@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MessageCircle, 
-  Send, 
-  X, 
-  User, 
-  Sparkles, 
-  Loader2, 
+import {
+  MessageCircle,
+  Send,
+  X,
+  User,
+  Sparkles,
+  Loader2,
   AlertCircle,
   RefreshCw,
   Heart
@@ -39,12 +39,12 @@ const AIChatAssistant = ({ fatigueData, onClose }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // Focus input when chat opens
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300);
-    }
-  }, [isOpen]);
+  // ❌ AUTO-FOCUS DIHAPUS - user harus klik input dulu
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     setTimeout(() => inputRef.current?.focus(), 300);
+  //   }
+  // }, [isOpen]);
 
   // Add welcome message when first opened
   useEffect(() => {
@@ -102,11 +102,10 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
       }]);
     } catch (err) {
       console.error('Chat error:', err);
-      setError(err.message || (language === 'id' 
+      setError(err.message || (language === 'id'
         ? 'Terjadi kesalahan. Silakan coba lagi.'
         : 'An error occurred. Please try again.'
       ));
-      
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: `⚠️ ${err.message || (language === 'id' ? 'Maaf, saya mengalami masalah teknis. Silakan coba lagi nanti.' : 'Sorry, I encountered a technical issue. Please try again later.')}`,
@@ -146,7 +145,8 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
 
   const handleSuggestedQuestion = (question) => {
     setInputMessage(question);
-    inputRef.current?.focus();
+    // ✅ Fokus ke input setelah klik suggested question (user sudah berinteraksi)
+    setTimeout(() => inputRef.current?.focus(), 50);
   };
 
   const formatMessage = (content) => {
@@ -165,9 +165,9 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
         className="glass-card p-6 text-center"
       >
         <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center overflow-hidden">
-          <img 
-            src={SAHAJA_AI_LOGO} 
-            alt="SAHAJA AI" 
+          <img
+            src={SAHAJA_AI_LOGO}
+            alt="SAHAJA AI"
             className="w-12 h-12 object-contain"
             onError={(e) => {
               e.target.style.display = 'none';
@@ -179,7 +179,7 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
           {language === 'id' ? 'Asisten AI Belum Aktif' : 'AI Assistant Not Active'}
         </h3>
         <p className="text-sm text-white/40 mb-4">
-          {language === 'id' 
+          {language === 'id'
             ? 'Tambahkan VITE_CEREBRAS_API_KEY di file .env Anda untuk mengaktifkan fitur chat AI.'
             : 'Add VITE_CEREBRAS_API_KEY to your .env file to enable the AI chat feature.'}
         </p>
@@ -191,7 +191,7 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button - ✅ RESPONSIVE POSITION */}
       {!isOpen && (
         <motion.button
           initial={{ scale: 0 }}
@@ -199,7 +199,9 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center shadow-lg shadow-primary/40 hover:shadow-primary/60 transition-shadow"
+          className="fixed z-50 w-14 h-14 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center shadow-lg shadow-primary/40 hover:shadow-primary/60 transition-shadow
+            bottom-4 right-4
+            md:bottom-6 md:right-6"
         >
           <MessageCircle className="w-6 h-6 text-white" />
           {messages.length > 1 && (
@@ -210,7 +212,7 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
         </motion.button>
       )}
 
-      {/* Chat Panel */}
+      {/* Chat Panel - ✅ RESPONSIVE LAYOUT */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -218,16 +220,20 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 right-6 z-50 w-full max-w-md max-h-[600px] flex flex-col glass-card overflow-hidden shadow-2xl shadow-primary/20"
-            style={{ height: 'calc(100vh - 100px)', maxHeight: '600px' }}
+            className="fixed z-50 flex flex-col glass-card overflow-hidden shadow-2xl shadow-primary/20
+              /* ✅ MOBILE: Full width dengan spacing di kiri-kanan, posisi di bawah */
+              bottom-4 left-4 right-4
+              /* ✅ DESKTOP: Posisi kanan bawah dengan max-width */
+              md:bottom-6 md:right-6 md:left-auto md:max-w-md"
+            style={{ height: 'calc(100vh - 120px)', maxHeight: '600px' }}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-glass-border bg-gradient-to-r from-primary/10 to-secondary/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-white/10">
-                  <img 
-                    src={SAHAJA_AI_LOGO} 
-                    alt="SAHAJA AI" 
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-white/10 flex-shrink-0">
+                  <img
+                    src={SAHAJA_AI_LOGO}
+                    alt="SAHAJA AI"
                     className="w-8 h-8 object-contain"
                     onError={(e) => {
                       e.target.style.display = 'none';
@@ -236,19 +242,19 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                   />
                   <Sparkles className="w-5 h-5 text-white hidden" />
                 </div>
-                <div>
-                  <h3 className="font-space font-semibold text-white text-sm">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-space font-semibold text-white text-sm truncate">
                     {language === 'id' ? 'Asisten Kesehatan AI' : 'AI Health Assistant'}
                   </h3>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" />
                     <span className="text-xs text-white/50">
                       {language === 'id' ? 'Online' : 'Online'}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   onClick={clearChat}
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -271,8 +277,8 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
             {/* Fatigue Context Banner */}
             {fatigueData && (
               <div className="px-4 py-2 bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-glass-border">
-                <div className="flex items-center gap-2 text-xs">
-                  <Heart className="w-3 h-3 text-primary-light" />
+                <div className="flex items-center gap-2 text-xs flex-wrap">
+                  <Heart className="w-3 h-3 text-primary-light flex-shrink-0" />
                   <span className="text-white/50">
                     {language === 'id' ? 'Konteks: ' : 'Context: '}
                   </span>
@@ -280,7 +286,7 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                     fatigueData.predictedClass === 'low' ? 'text-green-400' :
                     fatigueData.predictedClass === 'medium' ? 'text-yellow-400' : 'text-red-400'
                   }`}>
-                    {fatigueData.predictedClass === 'low' 
+                    {fatigueData.predictedClass === 'low'
                       ? (language === 'id' ? 'Kelelahan Rendah' : 'Low Fatigue')
                       : fatigueData.predictedClass === 'medium'
                       ? (language === 'id' ? 'Kelelahan Sedang' : 'Medium Fatigue')
@@ -300,14 +306,14 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
               {messages.length === 0 && (
                 <div className="text-center py-8">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
-                    <img 
-                      src={SAHAJA_AI_LOGO} 
-                      alt="SAHAJA AI" 
+                    <img
+                      src={SAHAJA_AI_LOGO}
+                      alt="SAHAJA AI"
                       className="w-10 h-10 object-contain opacity-30"
                     />
                   </div>
                   <p className="text-sm text-white/30">
-                    {language === 'id' 
+                    {language === 'id'
                       ? 'Mulai percakapan dengan asisten AI...'
                       : 'Start a conversation with the AI assistant...'}
                   </p>
@@ -333,9 +339,9 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                     {message.role === 'user' ? (
                       <User className="w-4 h-4 text-white" />
                     ) : (
-                      <img 
-                        src={SAHAJA_AI_LOGO} 
-                        alt="SAHAJA AI" 
+                      <img
+                        src={SAHAJA_AI_LOGO}
+                        alt="SAHAJA AI"
                         className="w-6 h-6 object-contain"
                         onError={(e) => {
                           e.target.style.display = 'none';
@@ -347,15 +353,15 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                   </div>
 
                   {/* Message Bubble */}
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  <div className={`max-w-[85%] md:max-w-[80%] rounded-2xl px-4 py-3 ${
                     message.role === 'user'
                       ? 'bg-gradient-to-r from-primary/20 to-secondary/20 border border-primary/20'
                       : message.isError
                       ? 'bg-accent/10 border border-accent/30'
                       : 'bg-white/5 border border-white/10'
                   }`}>
-                    <div 
-                      className={`text-sm leading-relaxed ${
+                    <div
+                      className={`text-sm leading-relaxed break-words ${
                         message.isError ? 'text-accent' : 'text-white/80'
                       }`}
                       dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
@@ -373,10 +379,10 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                   animate={{ opacity: 1 }}
                   className="flex gap-3"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={SAHAJA_AI_LOGO} 
-                      alt="SAHAJA AI" 
+                  <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img
+                      src={SAHAJA_AI_LOGO}
+                      alt="SAHAJA AI"
                       className="w-6 h-6 object-contain animate-pulse"
                     />
                   </div>
@@ -423,17 +429,17 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                 </div>
               )}
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-end gap-2">
                 <textarea
                   ref={inputRef}
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={language === 'id' 
-                    ? 'Tanyakan sesuatu tentang kesehatan mental...'
-                    : 'Ask something about mental health...'
+                  placeholder={language === 'id'
+                    ? 'Klik di sini lalu ketik pertanyaan Anda...'
+                    : 'Click here then type your question...'
                   }
-                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary/50 resize-none max-h-24"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary/50 focus:bg-white/10 resize-none max-h-24 transition-all cursor-text"
                   rows={1}
                   disabled={isLoading}
                 />
@@ -442,13 +448,14 @@ Feel free to ask anything about mental health, stress, fatigue, or request perso
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSendMessage}
                   disabled={!inputMessage.trim() || isLoading}
-                  className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-primary/30 transition-shadow"
+                  className="w-11 h-11 flex-shrink-0 bg-gradient-to-r from-primary to-secondary rounded-xl flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-primary/30 transition-shadow"
                 >
                   <Send className="w-4 h-4 text-white" />
                 </motion.button>
               </div>
+
               <p className="text-[10px] text-white/20 mt-2 text-center">
-                {language === 'id' 
+                {language === 'id'
                   ? 'Powered by Cerebras AI • Bukan pengganti saran medis profesional'
                   : 'Powered by Cerebras AI • Not a substitute for professional medical advice'}
               </p>
